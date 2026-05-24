@@ -223,6 +223,8 @@ body{height:auto !important;overflow:auto !important;display:block !important}
     </div>
     <div class="flex items-center gap-2">
       <p class="font-bold text-sm leading-tight" id="draw-status-text">等待開獎</p>
+      <button id="sound-btn" onclick="toggleVideoSound()" title="開/關聲音"
+        style="background:rgba(0,0,0,.5);border:1px solid #4f46e5;border-radius:20px;padding:2px 10px;font-size:.75rem;color:#c4b5fd;cursor:pointer">🔇 聲音</button>
     </div>
   </div>
 
@@ -570,7 +572,7 @@ function setSpriteState(name, durationMs = 0) {
 // ══════════════════════════════════════
 //  CONSTANTS & CONFIG
 // ══════════════════════════════════════
-const INITIAL_CREDITS = 1000;
+const INITIAL_CREDITS = 10000;
 const BET_COST = 25;
 // 大/小/單/雙：41~80號≥13個→大，01~40號≥13個→小，同理單雙
 const PERIOD_SEC = 300;        // 5 分鐘一期（秒）
@@ -1231,15 +1233,8 @@ async function animateDraw(numbers) {
   state.isAnimating = false;
 }
 
-function highlightMatches(drawnNums) {
-  document.querySelectorAll('.num-btn[data-num]').forEach(btn => {
-    const n = parseInt(btn.dataset.num);
-    if (drawnNums.includes(n) && btn.classList.contains('selected')) {
-      btn.classList.add('matched');
-    } else {
-      btn.classList.remove('drawn', 'matched');
-    }
-  });
+function highlightMatches(_drawnNums) {
+  // 不對號碼格做任何開獎高亮
 }
 
 function settleBets(drawnNums, period, stats) {
@@ -1501,9 +1496,6 @@ function renderNumberGrid() {
     btn.dataset.num = n;
     btn.textContent = String(n).padStart(2, '0');
     if (state.selectedNums.includes(n)) btn.classList.add('selected');
-    if (state.currentDraw && state.currentDraw.numbers.includes(n) && state.selectedNums.includes(n)) {
-      btn.classList.add('matched');
-    }
     btn.addEventListener('click', () => toggleNum(n));
     grid.appendChild(btn);
   }
@@ -1599,12 +1591,12 @@ function renderPendingBets() {
       } else if (bet.type === 'super') {
         desc = `超級獎號 | 猜 ${String(bet.number).padStart(2,'0')}`;
       }
-      return `<div class="bet-card text-xs flex justify-between items-center gap-2">
+      return `<div class="bet-card flex justify-between items-center gap-2" style="padding:.6rem .8rem">
         <div class="flex-1 min-w-0">
-          <p class="text-indigo-300 truncate">${desc}</p>
-          <p class="text-gray-500">$${bet.amount}/期 · 剩 ${bet.periodsLeft}/${bet.totalPeriods} 期</p>
+          <p class="font-bold text-sm text-indigo-200 truncate">${desc}</p>
+          <p class="text-xs text-gray-400 mt-0.5">$${bet.amount}/期 &nbsp;·&nbsp; 剩 ${bet.periodsLeft}/${bet.totalPeriods} 期</p>
         </div>
-        <span class="text-yellow-500 font-bold flex-shrink-0">待開</span>
+        <span class="text-yellow-400 font-black text-sm flex-shrink-0">待開</span>
       </div>`;
     }).join('');
   }
@@ -1755,12 +1747,7 @@ function toggleNum(n) {
   }
   // Update just this button
   const btn = document.querySelector(`.num-btn[data-num="${n}"]`);
-  if (btn) {
-    btn.classList.toggle('selected', idx < 0);
-    if (state.currentDraw && state.currentDraw.numbers.includes(n)) {
-      btn.classList.toggle('matched', idx < 0);
-    }
-  }
+  if (btn) btn.classList.toggle('selected', idx < 0);
   document.getElementById('sel-count').textContent = state.selectedNums.length;
 }
 
@@ -1878,6 +1865,15 @@ function showToast(msg, duration = 2500) {
 // ══════════════════════════════════════
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+function toggleVideoSound() {
+  const v = document.getElementById('live-stream');
+  const btn = document.getElementById('sound-btn');
+  if (!v || !btn) return;
+  v.muted = !v.muted;
+  btn.textContent = v.muted ? '🔇 聲音' : '🔊 聲音';
+  btn.style.color = v.muted ? '#c4b5fd' : '#4ade80';
+}
+
 // ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
@@ -1925,8 +1921,12 @@ document.addEventListener('DOMContentLoaded', init);
 //  SCRATCH CARD GAME (刮刮樂)
 // ══════════════════════════════════════
 const SC_COST = 100;
-const SC_AMOUNTS = [50, 100, 200, 500, 1000, 2000];
-const SC_PRIZE_OPTIONS = [200, 500, 1000, 2000];
+// 左欄展示用金額（含各獎級）
+const SC_DISP_AMTS  = [50, 100, 150, 200, 300, 500];
+// 分層獎金
+const SC_SMALL_AMTS = [50, 100, 150, 200];        // 小獎 20%
+const SC_MED_PRIZES = [300, 500, 800, 1000];       // 中獎  8%
+const SC_BIG_AMT    = 2000;                        // 大獎  2%
 const SC_RIGHT_POOL = ['14','21','28','35','42','49','56','63','70'];
 
 let sc = {
@@ -1971,52 +1971,63 @@ function buyScratchCard() {
 }
 
 function makeLosingLeft() {
-  // 6 cells, no 3 identical, no '7'
-  const pool = [...SC_AMOUNTS].sort(() => Math.random() - .5);
-  // 2 of pool[0], 1 each of pool[1..3], 1 more of pool[4]
+  // 6 cells, 最多 2 個相同，不含 '7'
+  const pool = [...SC_DISP_AMTS].sort(() => Math.random() - .5);
+  // [pool0, pool0, pool1, pool2, pool3, pool4] → 最多 2 個 pool0
   const cells = [pool[0], pool[0], pool[1], pool[2], pool[3], pool[4]];
   return cells.sort(() => Math.random() - .5);
 }
 
 function generateScratchResult() {
   const rng = Math.random();
-  let winType = 'none', winAmount = 0;
+  let winType = 'none', winAmount = 0, prizeAmt = 0;
   let leftCells = [], rightCells = [];
-  const prizeAmt = SC_PRIZE_OPTIONS[Math.floor(Math.random() * SC_PRIZE_OPTIONS.length)];
 
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
   const randRight = () => SC_RIGHT_POOL[Math.floor(Math.random() * SC_RIGHT_POOL.length)];
-
-  if (rng < 0.15) {
-    // Left match
-    winType = 'left_match';
-    const amt = SC_AMOUNTS[Math.floor(Math.random() * SC_AMOUNTS.length)];
-    winAmount = amt;
-    const others = SC_AMOUNTS.filter(a => a !== amt).sort(() => Math.random() - .5).slice(0, 3);
-    leftCells = [amt, amt, amt, ...others].sort(() => Math.random() - .5);
-    rightCells = Array(9).fill(null).map(randRight);
-
-  } else if (rng < 0.20) {
-    // Lucky 7
-    winType = 'lucky7';
-    winAmount = 700;
-    leftCells = ['7', ...SC_AMOUNTS.sort(() => Math.random() - .5).slice(0,5)].sort(() => Math.random() - .5);
-    rightCells = Array(9).fill(null).map(randRight);
-
-  } else if (rng < 0.3011) {
-    // Right line win
-    winType = 'right_line';
-    winAmount = prizeAmt;
+  const makeLine = () => {
     const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    const chosen = lines[Math.floor(Math.random() * lines.length)];
+    return lines[Math.floor(Math.random() * lines.length)];
+  };
+
+  if (rng < 0.20) {
+    // ★ 小獎 20%：左欄 3 個相同（$50~$200）
+    winType = 'left_match';
+    winAmount = pick(SC_SMALL_AMTS);
+    const others = SC_DISP_AMTS.filter(a => a !== winAmount).sort(() => Math.random() - .5).slice(0, 3);
+    leftCells = [winAmount, winAmount, winAmount, ...others].sort(() => Math.random() - .5);
     rightCells = Array(9).fill(null).map(randRight);
-    chosen.forEach(i => { rightCells[i] = '07'; });
+    prizeAmt = 0;
+
+  } else if (rng < 0.28) {
+    // ★ 中獎 8%：右欄連線（$300~$1,000）
+    winType = 'right_line';
+    winAmount = pick(SC_MED_PRIZES);
+    prizeAmt = winAmount;
+    const line = makeLine();
+    rightCells = Array(9).fill(null).map(randRight);
+    line.forEach(i => { rightCells[i] = '07'; });
     leftCells = makeLosingLeft();
 
+  } else if (rng < 0.30) {
+    // ★ 大獎 2%：左欄 3 個 $2,000
+    winType = 'left_match';
+    winAmount = SC_BIG_AMT;
+    const others = SC_DISP_AMTS.sort(() => Math.random() - .5).slice(0, 3);
+    leftCells = [SC_BIG_AMT, SC_BIG_AMT, SC_BIG_AMT, ...others].sort(() => Math.random() - .5);
+    rightCells = Array(9).fill(null).map(randRight);
+    prizeAmt = 0;
+
   } else {
+    // 未中 70%
     winType = 'none';
     leftCells = makeLosingLeft();
     rightCells = Array(9).fill(null).map(randRight);
+    prizeAmt = pick(SC_MED_PRIZES); // 獎金欄仍顯示金額（未中）
   }
+
+  // 獎金欄預設（連線獎之外的情形隨機顯示）
+  if (!prizeAmt) prizeAmt = pick(SC_MED_PRIZES);
 
   return { winType, winAmount, leftCells, rightCells, prizeAmt };
 }
