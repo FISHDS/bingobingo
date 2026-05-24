@@ -62,9 +62,9 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
 #sprite-char{display:none}
 
 /* ══ 太太人像結果顯示 ══ */
-#sprite-result-wrap{position:absolute;bottom:0;right:4%;z-index:15;width:90px;height:130px;overflow:hidden;pointer-events:none;opacity:0;transition:opacity .5s}
+#sprite-result-wrap{position:absolute;bottom:0;right:2%;z-index:15;width:min(38%,160px);pointer-events:none;opacity:0;transition:opacity .6s}
 #sprite-result-wrap.show{opacity:1}
-#sprite-result-img{position:absolute;width:270px;height:auto;left:-90px;bottom:0}
+#sprite-result-img{width:100%;height:auto;display:block}
 
 /* ══ 手機底部導覽 ══ */
 #mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#0a0a2e;border-top:1px solid #312e81;height:56px;align-items:stretch}
@@ -154,9 +154,8 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
   .num-btn{height:30px;font-size:.72rem}
   .draw-ball{width:38px;height:38px;font-size:.72rem}
 
-  /* 太太人像小一點 */
-  #sprite-result-wrap{width:65px !important;height:100px !important;right:2% !important}
-  #sprite-result-img{width:195px !important;left:-65px !important}
+  /* 太太人像手機版 */
+  #sprite-result-wrap{width:min(28%,90px) !important}
 
   /* 底部導覽列 */
   #mobile-nav{display:flex}
@@ -282,7 +281,7 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 
   <!-- 太太人像 -->
   <div id="sprite-result-wrap">
-    <img id="sprite-result-img" src="" alt="">
+    <img id="sprite-result-img" src="" alt="" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,.7))">
   </div>
 
   <!-- 結算橫幅（替代彈窗） -->
@@ -2342,9 +2341,15 @@ function resetScratch() {
   sc.active = false;
   sc.revealed = false;
   sc.result = null;
-  updateScCredits();
-  document.getElementById('scratch-game').style.display = 'none';
-  document.getElementById('scratch-shop').style.display = 'flex';
+  if (state.credits >= SC_COST) {
+    // 點數夠 → 直接買下一張，不回商店
+    buyScratchCard();
+  } else {
+    // 點數不足 → 回商店顯示餘額
+    updateScCredits();
+    document.getElementById('scratch-game').style.display = 'none';
+    document.getElementById('scratch-shop').style.display = 'flex';
+  }
 }
 </script>
 </body>
