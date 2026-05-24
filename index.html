@@ -156,17 +156,6 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
   </div>
 </div>
 
-<!-- ═══ TICKER ═══ -->
-<div class="bg-[#06061a] border-b border-indigo-950 px-0 py-1.5">
-  <div class="ticker-wrap">
-    <div class="ticker-inner text-xs" id="ticker-inner">
-      <span class="text-indigo-500 font-bold px-4">🎲 最新開獎走勢</span>
-      <span class="text-gray-500" id="ticker-a">載入中...</span>
-      <span class="text-indigo-500 font-bold px-4">🎲 最新開獎走勢</span>
-      <span class="text-gray-500" id="ticker-b">載入中...</span>
-    </div>
-  </div>
-</div>
 
 <!-- ═══ MAIN CONTENT ═══ -->
 <div class="flex flex-col lg:flex-row gap-3 p-3 max-w-7xl mx-auto">
@@ -223,12 +212,12 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
     <!-- ── BIG/SMALL/ODD/EVEN PANEL ── -->
     <div id="panel-bigsmall" class="hidden">
       <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900 mb-3">
-        <p class="s-lbl">大 / 小 <span class="text-gray-500 normal-case font-normal text-[10px]">（20球總和 ≥ 810 為大，＜ 810 為小）</span></p>
+        <p class="s-lbl">大 / 小 <span class="text-gray-500 normal-case font-normal text-[10px]">（41~80號 ≥ 13個為大，01~40號 ≥ 13個為小）</span></p>
         <div class="flex gap-3 mb-4">
           <div class="choice-btn flex-1 text-center border-blue-500 text-blue-300" style="color:#60a5fa;border-color:#3b82f6" onclick="chooseBigSmall('big')" id="btn-big">大 BIG</div>
           <div class="choice-btn flex-1 text-center border-orange-500 text-orange-300" style="color:#fb923c;border-color:#f97316" onclick="chooseBigSmall('small')" id="btn-small">小 SMALL</div>
         </div>
-        <p class="s-lbl">單 / 雙 <span class="text-gray-500 normal-case font-normal text-[10px]">（20球總和奇數為單，偶數為雙）</span></p>
+        <p class="s-lbl">單 / 雙 <span class="text-gray-500 normal-case font-normal text-[10px]">（奇數球 ≥ 13個為單，偶數球 ≥ 13個為雙）</span></p>
         <div class="flex gap-3">
           <div class="choice-btn flex-1 text-center border-pink-500 text-pink-300" style="color:#f472b6;border-color:#ec4899" onclick="chooseOddEven('odd')" id="btn-odd">單 ODD</div>
           <div class="choice-btn flex-1 text-center border-teal-500 text-teal-300" style="color:#2dd4bf;border-color:#14b8a6" onclick="chooseOddEven('even')" id="btn-even">雙 EVEN</div>
@@ -258,7 +247,7 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
     <!-- ── SUPER PRIZE PANEL ── -->
     <div id="panel-super" class="hidden">
       <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900 mb-3">
-        <p class="s-lbl">超級獎號 <span class="text-gray-500 normal-case font-normal text-[10px]">（猜第20球號碼，中獎賠 4 倍）</span></p>
+        <p class="s-lbl">超級獎號 <span class="text-gray-500 normal-case font-normal text-[10px]">（猜第20球號碼，中獎賠 48 倍 $1,200）</span></p>
         <div class="grid gap-1 mt-2" style="grid-template-columns:repeat(10,1fr)" id="super-grid"></div>
         <p class="text-xs text-gray-500 mt-2">已選：<span class="text-yellow-400 font-bold" id="super-sel">未選擇</span></p>
       </div>
@@ -291,6 +280,10 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
       </div>
       <div id="pending-list" class="space-y-1.5 max-h-40 overflow-y-auto">
         <p class="text-gray-600 text-xs text-center py-3">尚無投注，請先選號下注</p>
+      </div>
+      <div class="border-t border-indigo-900/50 mt-2 pt-2 flex justify-between items-center">
+        <span class="text-[10px] text-gray-500">本場累積盈虧</span>
+        <span class="text-sm font-black" id="session-pnl-display">$0</span>
       </div>
     </div>
 
@@ -326,11 +319,7 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
       </div>
 
       <!-- Stats row -->
-      <div class="grid grid-cols-3 gap-2">
-        <div class="bg-[#0f0f35] rounded-lg p-2.5 text-center border border-indigo-950">
-          <p class="s-lbl mb-0.5">總和</p>
-          <p class="text-2xl font-black text-white leading-tight" id="stat-sum">--</p>
-        </div>
+      <div class="grid grid-cols-2 gap-2">
         <div class="bg-[#0f0f35] rounded-lg p-2.5 text-center border border-indigo-950">
           <p class="s-lbl mb-0.5">大小</p>
           <p class="text-2xl font-black leading-tight" id="stat-bigsmall">--</p>
@@ -345,7 +334,7 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
       <div class="mt-2 bg-[#0f0f35] rounded-lg p-2.5 border border-yellow-900/50 flex items-center justify-between">
         <div>
           <p class="s-lbl text-yellow-700 mb-0.5">超級獎號（第20球）</p>
-          <p class="text-[10px] text-gray-600">賠率 4 倍</p>
+          <p class="text-[10px] text-gray-600">賠率 48 倍</p>
         </div>
         <div class="draw-ball super-ball show text-lg" style="width:56px;height:56px;opacity:1;transform:scale(1)" id="super-num-display">--</div>
       </div>
@@ -360,7 +349,6 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
             <tr class="text-indigo-500 border-b border-indigo-900">
               <th class="text-left pb-1.5 font-bold">期號</th>
               <th class="pb-1.5 font-bold">開出號碼</th>
-              <th class="pb-1.5 font-bold">總和</th>
               <th class="pb-1.5 font-bold">大小</th>
               <th class="pb-1.5 font-bold">單雙</th>
             </tr>
@@ -419,9 +407,9 @@ const INITIAL_CREDITS = 1000;
 const BET_COST = 25;
 // 大/小/單/雙：41~80號≥13個→大，01~40號≥13個→小，同理單雙
 const PERIOD_SEC = 300;        // 5 分鐘一期（秒）
-const DRAW_OFFSET_SEC = 65;    // 開獎後延遲 65 秒再抓（給台彩更新時間）
-const RETRY_INTERVAL = 20000;  // 抓失敗後每 20 秒重試
-const MAX_RETRY = 4;           // 最多重試 4 次
+const DRAW_OFFSET_SEC = 60;    // 開獎後延遲 60 秒再第一次抓
+const RETRY_INTERVAL = 30000;  // 抓失敗後每 30 秒重試
+const MAX_RETRY = 5;           // 最多重試 5 次（1:00、1:30、2:00、2:30、3:00）
 
 const CORS_PROXIES = [
   '',                                          // 直接打（裝 CORS 擴充後有效）
@@ -498,7 +486,8 @@ let state = {
   retryTimer: null,
   retryCount: 0,
   countdownTimer: null,
-  isAnimating: false
+  isAnimating: false,
+  sessionPnL: 0
 };
 
 // ══════════════════════════════════════
@@ -512,7 +501,8 @@ function saveState() {
       pendingBets: state.pendingBets,
       betHistory: state.betHistory.slice(-50),
       drawHistory: state.drawHistory.slice(-10),
-      currentDraw: state.currentDraw
+      currentDraw: state.currentDraw,
+      sessionPnL: state.sessionPnL
     }));
   } catch(e) { console.warn('Save failed', e); }
 }
@@ -528,6 +518,7 @@ function loadState() {
     state.betHistory = saved.betHistory || [];
     state.drawHistory = saved.drawHistory || [];
     state.currentDraw = saved.currentDraw || null;
+    state.sessionPnL = typeof saved.sessionPnL === 'number' ? saved.sessionPnL : 0;
   } catch(e) { console.warn('Load failed', e); }
 }
 
@@ -540,6 +531,7 @@ function resetGame() {
   state.betHistory = [];
   state.drawHistory = [];
   state.currentDraw = null;
+  state.sessionPnL = 0;
   saveState();
   renderAll();
   showToast('遊戲已重置，點數恢復 $1,000');
@@ -1051,7 +1043,6 @@ async function animateDraw(numbers) {
   // Update stats
   const { sum, isBig, isSmall, isOdd, isEven } = computeDrawStats(numbers);
 
-  document.getElementById('stat-sum').textContent = sum;
   const bsEl = document.getElementById('stat-bigsmall');
   bsEl.textContent = isBig ? '大' : isSmall ? '小' : '－';
   bsEl.className = `text-2xl font-black leading-tight ${isBig ? 'neon-cyan' : isSmall ? 'neon-red' : 'text-gray-400'}`;
@@ -1141,6 +1132,7 @@ function settleBets(drawnNums, period, stats) {
     // Credit
     const r = results[results.length - 1];
     state.credits += r.winAmount;
+    state.sessionPnL += r.net;
 
     // Move to history if fully settled
     if (bet.status === 'settled') {
@@ -1318,13 +1310,12 @@ function renderDrawBoard() {
     grid.appendChild(div);
   });
 
-  document.getElementById('stat-sum').textContent = sum;
-  const bsEl = document.getElementById('stat-bigsmall');
-  bsEl.textContent = isBig ? '大' : isSmall ? '小' : '－';
-  bsEl.className = `text-2xl font-black leading-tight ${isBig ? 'neon-cyan' : isSmall ? 'neon-red' : 'text-gray-400'}`;
-  const oeEl = document.getElementById('stat-oddeven');
-  oeEl.textContent = isOdd ? '單' : isEven ? '雙' : '－';
-  oeEl.className = `text-2xl font-black leading-tight ${isOdd ? 'neon-purple' : isEven ? 'neon-green' : 'text-gray-400'}`;
+  const bsEl2 = document.getElementById('stat-bigsmall');
+  bsEl2.textContent = isBig ? '大' : isSmall ? '小' : '－';
+  bsEl2.className = `text-2xl font-black leading-tight ${isBig ? 'neon-cyan' : isSmall ? 'neon-red' : 'text-gray-400'}`;
+  const oeEl2 = document.getElementById('stat-oddeven');
+  oeEl2.textContent = isOdd ? '單' : isEven ? '雙' : '－';
+  oeEl2.className = `text-2xl font-black leading-tight ${isOdd ? 'neon-purple' : isEven ? 'neon-green' : 'text-gray-400'}`;
 
   const superEl = document.getElementById('super-num-display');
   superEl.textContent = String(nums[19]).padStart(2, '0');
@@ -1335,10 +1326,6 @@ function renderDrawBoard() {
   // Highlight matches on grid
   if (state.selectedNums.length > 0) highlightMatches(nums);
 
-  // Update ticker
-  const tickerText = `第 ${draw.period || '--'} 期 | 號碼：${nums.map(n => String(n).padStart(2,'0')).join(' ')} | 總和 ${sum} | ${isBig ? '大' : isSmall ? '小' : '－'} ${isOdd ? '單' : isEven ? '雙' : '－'}`;
-  document.getElementById('ticker-a').textContent = tickerText;
-  document.getElementById('ticker-b').textContent = tickerText;
 }
 
 function renderNumberGrid() {
@@ -1437,29 +1424,36 @@ function renderPendingBets() {
 
   if (bets.length === 0) {
     container.innerHTML = '<p class="text-gray-600 text-xs text-center py-3">尚無投注，請先選號下注</p>';
-    return;
+  } else {
+    container.innerHTML = bets.map(bet => {
+      let desc = '';
+      if (bet.type === 'star') {
+        desc = `${bet.stars}★ 投注 | ${bet.columns}柱 | 號碼：${bet.numbers.map(n => String(n).padStart(2,'0')).join(' ')}`;
+      } else if (bet.type === 'bigsmall') {
+        const parts = [];
+        if (bet.bigChoice) parts.push(bet.bigChoice === 'big' ? '大' : '小');
+        if (bet.oddChoice) parts.push(bet.oddChoice === 'odd' ? '單' : '雙');
+        desc = `大小單雙 | ${parts.join('+')}`;
+      } else if (bet.type === 'super') {
+        desc = `超級獎號 | 猜 ${String(bet.number).padStart(2,'0')}`;
+      }
+      return `<div class="bet-card text-xs flex justify-between items-center gap-2">
+        <div class="flex-1 min-w-0">
+          <p class="text-indigo-300 truncate">${desc}</p>
+          <p class="text-gray-500">$${bet.amount}/期 · 剩 ${bet.periodsLeft}/${bet.totalPeriods} 期</p>
+        </div>
+        <span class="text-yellow-500 font-bold flex-shrink-0">待開</span>
+      </div>`;
+    }).join('');
   }
 
-  container.innerHTML = bets.map(bet => {
-    let desc = '';
-    if (bet.type === 'star') {
-      desc = `${bet.stars}★ 投注 | ${bet.columns}柱 | 號碼：${bet.numbers.map(n => String(n).padStart(2,'0')).join(' ')}`;
-    } else if (bet.type === 'bigsmall') {
-      const parts = [];
-      if (bet.bigChoice) parts.push(bet.bigChoice === 'big' ? '大' : '小');
-      if (bet.oddChoice) parts.push(bet.oddChoice === 'odd' ? '單' : '雙');
-      desc = `大小單雙 | ${parts.join('+')}`;
-    } else if (bet.type === 'super') {
-      desc = `超級獎號 | 猜 ${String(bet.number).padStart(2,'0')}`;
-    }
-    return `<div class="bet-card text-xs flex justify-between items-center gap-2">
-      <div class="flex-1 min-w-0">
-        <p class="text-indigo-300 truncate">${desc}</p>
-        <p class="text-gray-500">$${bet.amount}/期 · 剩 ${bet.periodsLeft}/${bet.totalPeriods} 期</p>
-      </div>
-      <span class="text-yellow-500 font-bold flex-shrink-0">待開</span>
-    </div>`;
-  }).join('');
+  // 更新累積盈虧
+  const pnlEl = document.getElementById('session-pnl-display');
+  if (pnlEl) {
+    const pnl = state.sessionPnL;
+    pnlEl.textContent = `${pnl >= 0 ? '+' : ''}$${pnl.toLocaleString()}`;
+    pnlEl.className = `text-sm font-black ${pnl > 0 ? 'neon-green' : pnl < 0 ? 'neon-red' : 'text-gray-500'}`;
+  }
 }
 
 function renderBetHistory() {
@@ -1496,7 +1490,6 @@ function renderHistory() {
           ${h.numbers.map((n, i) => `<span class="${i===19 ? 'text-yellow-400' : 'text-gray-300'}">${String(n).padStart(2,'0')}</span>`).join(' ')}
         </div>
       </td>
-      <td class="text-center py-1 text-white font-bold">${h.sum}</td>
       <td class="text-center py-1 ${h.isBig ? 'text-cyan-400' : h.isSmall ? 'text-red-400' : 'text-gray-500'} font-bold">${h.isBig ? '大' : h.isSmall ? '小' : '－'}</td>
       <td class="text-center py-1 ${h.isOdd ? 'text-purple-400' : h.isEven ? 'text-green-400' : 'text-gray-500'} font-bold">${h.isOdd ? '單' : h.isEven ? '雙' : '－'}</td>
     </tr>`).join('');
@@ -1504,15 +1497,63 @@ function renderHistory() {
 
 function renderPayoutRef() {
   const el = document.getElementById('payout-ref');
-  const rows = [];
-  rows.push(`<div class="pay-row"><span class="text-gray-500">大小/單雙（≥13個）</span><span class="text-yellow-400">6倍 $150</span></div>`);
-  rows.push(`<div class="pay-row"><span class="text-gray-500">超級獎號（第20顆）</span><span class="text-yellow-400">48倍 $1,200</span></div>`);
-  for (let s = 1; s <= 10; s++) {
-    const table = PAYOUT[s];
-    const parts = Object.entries(table).map(([k,v]) => `中${k}→${v}x`).join(', ');
-    rows.push(`<div class="pay-row"><span class="text-indigo-400">${s}星</span><span class="text-gray-300">${parts}</span></div>`);
+  const stars = [10,9,8,7,6,5,4,3,2,1];
+
+  // 大小單雙 & 超級獎號 快覽
+  let html = `<div class="flex gap-2 mb-2">
+    <div class="flex-1 bg-[#0f0f35] rounded p-1.5 text-center border border-indigo-950">
+      <p class="text-[9px] text-gray-500">大小 / 單雙（≥13個）</p>
+      <p class="text-xs text-yellow-400 font-bold">6倍 → $150</p>
+    </div>
+    <div class="flex-1 bg-[#0f0f35] rounded p-1.5 text-center border border-indigo-950">
+      <p class="text-[9px] text-gray-500">超級獎號（第20球）</p>
+      <p class="text-xs text-yellow-400 font-bold">48倍 → $1,200</p>
+    </div>
+  </div>`;
+
+  // 星數賠率格子表
+  html += '<div class="overflow-x-auto"><table style="border-collapse:collapse;width:100%">';
+  // header
+  html += '<thead><tr>';
+  html += '<th style="background:#0f0f35;color:#818cf8;padding:3px 4px;text-align:center;border:1px solid #1e1b4b;font-size:8px;white-space:nowrap">中\\玩法</th>';
+  for (const s of stars) {
+    html += `<th style="background:#0f0f35;color:#a5b4fc;padding:3px 4px;text-align:center;border:1px solid #1e1b4b;font-size:8px">${s}★</th>`;
   }
-  el.innerHTML = rows.join('');
+  html += '</tr></thead><tbody>';
+
+  // rows: 中球數由高到低
+  for (let hits = 10; hits >= 0; hits--) {
+    html += '<tr>';
+    html += `<td style="background:#080820;color:#94a3b8;padding:3px 4px;text-align:center;border:1px solid #1e1b4b;font-size:8px;font-weight:700">${hits}</td>`;
+    for (const s of stars) {
+      if (hits > s) {
+        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #1e1b4b;color:#1e1b4b;font-size:8px">-</td>`;
+        continue;
+      }
+      const table = PAYOUT[s] || {};
+      const mult = table[hits];
+      if (mult === undefined) {
+        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #1e1b4b;color:#374151;font-size:8px">-</td>`;
+      } else if (mult === 0) {
+        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #1e1b4b;color:#374151;font-size:8px">0</td>`;
+      } else {
+        const prize = mult * BET_COST;
+        let label;
+        if (prize >= 1000000) label = (prize/10000).toFixed(0) + '萬';
+        else if (prize >= 10000) label = (prize/10000).toFixed(1).replace('.0','') + '萬';
+        else if (prize >= 1000) label = prize.toLocaleString();
+        else label = String(prize);
+        const isTop = prize >= 1000;
+        const color = isTop ? '#fbbf24' : '#d1d5db';
+        const bg = isTop ? 'rgba(251,191,36,.08)' : 'transparent';
+        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #1e1b4b;color:${color};background:${bg};font-size:8px;font-weight:${isTop?'700':'400'}">${label}</td>`;
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+
+  el.innerHTML = html;
 }
 
 function updateBetCosts() {
