@@ -251,6 +251,12 @@ body{height:auto !important;overflow:auto !important;display:block !important}
       </div>
       <p class="text-[10px] text-gray-500" id="last-fetch-time"></p>
     </div>
+    <!-- 預覽測試按鈕 -->
+    <div style="display:flex;gap:4px;margin-right:4px">
+      <button onclick="triggerBetSceneAnimation()" title="預覽：投注場景" style="background:rgba(99,102,241,.2);border:1px solid #4f46e5;border-radius:6px;padding:2px 7px;font-size:.7rem;color:#a5b4fc;cursor:pointer">🏪</button>
+      <button onclick="triggerPunishmentAnimation()" title="預覽：懲罰動畫" style="background:rgba(236,72,153,.2);border:1px solid #ec4899;border-radius:6px;padding:2px 7px;font-size:.7rem;color:#f9a8d4;cursor:pointer">💋</button>
+      <button onclick="showWinBurst(1000)" title="預覽：大贏動畫" style="background:rgba(251,191,36,.15);border:1px solid #f59e0b;border-radius:6px;padding:2px 7px;font-size:.7rem;color:#fbbf24;cursor:pointer">🎉</button>
+    </div>
     <button onclick="resetGame()" title="重置遊戲" class="text-gray-600 hover:text-red-400 text-sm transition-colors">⚙</button>
   </div>
 </header>
