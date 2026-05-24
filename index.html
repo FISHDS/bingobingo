@@ -224,12 +224,12 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 #walk-overlay.visible{opacity:1}
 #walk-scene{position:relative;width:min(92vw,440px);height:min(62vw,300px);border-radius:12px;overflow:hidden;border:2px solid #4f46e5;box-shadow:0 0 50px rgba(99,102,241,.6)}
 #walk-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-#walk-sprite-container{position:absolute;bottom:0;width:22%;overflow:hidden}
-#walk-sprite-img{display:block;width:400%;height:auto;image-rendering:pixelated}
-#walk-back-img{position:absolute;bottom:0;right:30%;height:62%;width:auto;object-fit:contain;image-rendering:pixelated;opacity:0;transition:opacity .3s}
+#walk-sprite-container{position:absolute;bottom:0;height:55%;aspect-ratio:1/1;overflow:hidden;transform:scaleX(-1)}
+#walk-sprite-img{display:block;width:400%;height:100%;image-rendering:pixelated}
+#walk-back-img{position:absolute;bottom:0;left:34%;height:58%;width:auto;object-fit:contain;image-rendering:pixelated;opacity:0;transition:opacity .3s}
 #walk-back-img.show{opacity:1}
 @keyframes walkCycle{from{transform:translateX(0)}to{transform:translateX(-100%)}}
-@keyframes walkAcross{from{left:105%}to{left:30%}}
+@keyframes walkAcross{from{left:-25%}to{left:42%}}
 </style>
 </head>
 <body>
@@ -621,10 +621,10 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 <div id="walk-overlay">
   <div id="walk-scene">
     <img id="walk-bg-img" src="BG.png" alt="">
-    <div id="walk-sprite-container" style="position:absolute;bottom:0;width:22%;overflow:hidden;left:105%">
+    <div id="walk-sprite-container" style="position:absolute;bottom:0;height:55%;aspect-ratio:1/1;overflow:hidden;left:-25%;transform:scaleX(-1)">
       <img id="walk-sprite-img" src="WALK.jpg" alt="">
     </div>
-    <img id="walk-back-img" src="BACK.jpg" alt="">
+    <img id="walk-back-img" src="BACK.png" alt="" style="display:none">
   </div>
 </div>
 
@@ -1473,7 +1473,7 @@ function triggerWalkAnimation() {
 
   // Reset
   spriteImg.style.animation = 'none';
-  spriteCont.style.cssText   = 'position:absolute;bottom:0;width:22%;overflow:hidden;left:105%';
+  spriteCont.style.cssText   = 'position:absolute;bottom:0;height:55%;aspect-ratio:1/1;overflow:hidden;left:-25%;transform:scaleX(-1)';
   backImg.classList.remove('show');
   backImg.style.display = 'none';
   spriteCont.style.display = '';
@@ -2074,15 +2074,35 @@ function confirmHubbyPin() {
 //  太太人像顯示
 // ══════════════════════════════════════
 function showSpriteResult(type, durationMs = 3500) {
-  // 中獎由 showWinBurst 統一顯示；這裡只處理未中（刮刮樂欄顯示難過太太）
-  if (type === 'win') return;
-  const wrap = document.getElementById('sprite-result-wrap');
-  const img  = document.getElementById('sprite-result-img');
-  if (!wrap || !img) return;
-  img.src = 'sprite-lose.png';
-  wrap.classList.add('show');
-  clearTimeout(wrap._hideTimer);
-  wrap._hideTimer = setTimeout(() => wrap.classList.remove('show'), durationMs);
+  if (type === 'win') return; // 中獎由 showWinBurst 統一處理
+
+  // 未中獎：與中獎使用同一覆蓋層，位置/大小完全相同，只換圖片與文字
+  const burst  = document.getElementById('win-burst');
+  const text   = document.getElementById('win-burst-text');
+  const sprite = document.getElementById('sprite-burst-img');
+  if (!burst || !sprite) return;
+
+  sprite.src = 'sprite-lose.png';
+  text.textContent = '😔 沒中...';
+  text.style.color = '#9ca3af';
+  text.style.textShadow = '0 0 16px #6b7280';
+
+  burst.classList.remove('hidden');
+  text.style.animation = 'none';
+  void text.offsetWidth;
+  text.style.animation = 'burstAnim .8s cubic-bezier(.34,1.56,.64,1) forwards';
+  sprite.style.opacity = '0';
+  void sprite.offsetWidth;
+  sprite.style.opacity = '1';
+
+  clearTimeout(burst._loseTimer);
+  burst._loseTimer = setTimeout(() => {
+    burst.classList.add('hidden');
+    sprite.style.opacity = '0';
+    text.style.color = '';
+    text.style.textShadow = '';
+    setTimeout(() => { sprite.src = 'sprite-win.png'; }, 400); // 還原
+  }, durationMs);
 }
 
 // ══════════════════════════════════════
