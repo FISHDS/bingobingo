@@ -224,6 +224,8 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 #bet-scene-overlay.show{opacity:1}
 #bet-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
 #bet-wife-img{position:absolute;bottom:-6%;left:35%;height:85%;width:auto;object-fit:contain;image-rendering:pixelated;transition:opacity .2s}
+#bet-punish-text{position:absolute;top:6%;left:50%;transform:translateX(-50%);font-size:1.3rem;font-weight:900;color:#f9a8d4;text-shadow:0 0 16px #ec4899,0 0 40px #ec4899;z-index:2;opacity:0;transition:opacity .35s;white-space:nowrap;pointer-events:none}
+#bet-punish-text.show{opacity:1}
 </style>
 </head>
 <body>
@@ -541,6 +543,7 @@ body{height:auto !important;overflow:auto !important;display:block !important}
       <div id="bet-scene-overlay">
         <img id="bet-bg-img" src="BG.png" alt="">
         <img id="bet-wife-img" src="blackview.png" alt="">
+        <div id="bet-punish-text">💋 接受懲罰！</div>
       </div>
     </div>
 
@@ -1450,6 +1453,55 @@ function placeBet(type) {
 }
 
 // ══════════════════════════════════════
+//  懲罰動畫（未中獎 → 太太彎腰受罰）
+// ══════════════════════════════════════
+function triggerPunishmentAnimation() {
+  const overlay     = document.getElementById('bet-scene-overlay');
+  const wifeImg     = document.getElementById('bet-wife-img');
+  const punishText  = document.getElementById('bet-punish-text');
+  if (!overlay) return;
+
+  if (window._betPoseTimer) { clearInterval(window._betPoseTimer); window._betPoseTimer = null; }
+  if (window._betHideTimer) { clearTimeout(window._betHideTimer); window._betHideTimer = null; }
+
+  // 兩個彎腰受罰姿勢（側身＋背影交替）
+  const poses = [
+    { src: 'lean-back.png', left: '32%' },
+    { src: 'lean-side.png', left: '12%' }
+  ];
+  let poseIdx = 0;
+  wifeImg.src = poses[0].src;
+  wifeImg.style.left = poses[0].left;
+  wifeImg.style.opacity = '1';
+
+  overlay.classList.add('show');
+
+  // 文字稍晚出現
+  setTimeout(() => { if (punishText) punishText.classList.add('show'); }, 400);
+
+  // 每 700ms 換姿勢
+  window._betPoseTimer = setInterval(() => {
+    wifeImg.style.opacity = '0';
+    setTimeout(() => {
+      poseIdx = (poseIdx + 1) % 2;
+      wifeImg.src = poses[poseIdx].src;
+      wifeImg.style.left = poses[poseIdx].left;
+      wifeImg.style.opacity = '1';
+    }, 220);
+  }, 700);
+
+  // 4.5 秒後收場
+  window._betHideTimer = setTimeout(() => {
+    clearInterval(window._betPoseTimer); window._betPoseTimer = null;
+    if (punishText) punishText.classList.remove('show');
+    overlay.classList.remove('show');
+    wifeImg.src = 'blackview.png';
+    wifeImg.style.left = '35%';
+    wifeImg.style.opacity = '1';
+  }, 4500);
+}
+
+// ══════════════════════════════════════
 //  投注場景動畫（蓋在開獎板，兩姿勢交替）
 // ══════════════════════════════════════
 function triggerBetSceneAnimation() {
@@ -1957,11 +2009,12 @@ function showSettlementModal(results, period) {
     setTimeout(() => banner.classList.remove('show'), 3500);
   }
 
-  // 太太人像
-  showSpriteResult(net > 0 ? 'win' : 'lose', net > 0 ? 4000 : 3000);
-
-  // 大贏爆炸效果
-  if (anyWin) showWinBurst(net);
+  // 太太人像：中獎→showWinBurst，未中→懲罰動畫
+  if (anyWin) {
+    showWinBurst(net);
+  } else {
+    triggerPunishmentAnimation();
+  }
 }
 
 function closeModal() {} // 保留空函數避免舊呼叫出錯
