@@ -114,10 +114,68 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
 
 @media(max-width:640px){
   .draw-ball{width:40px;height:40px;font-size:.75rem}
-  #video-section{height:28vh}
+  #top-section{flex-direction:column}
+  #video-col,#scratch-col{width:100%}
   #bottom-split{flex-direction:column}
   .left-panel,.right-panel{width:100%}
 }
+
+/* ══ Layout overrides for scrollable page ══ */
+body{height:auto !important;overflow:auto !important;display:block !important}
+
+/* ══ Top section ══ */
+#top-section{display:flex;min-height:480px}
+#video-col{width:50%;position:relative;background:#000;flex-shrink:0;min-height:480px}
+#video-section{position:absolute !important;inset:0;height:auto !important}
+#live-stream{object-fit:contain !important;background:#000}
+
+/* ══ Scratch column ══ */
+#scratch-col{width:50%;background:#0a0a22;border-left:1px solid #1e1b4b;overflow-y:auto;display:flex;flex-direction:column;min-height:480px}
+
+/* ══ Scratch shop ══ */
+#scratch-shop{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:16px}
+.sc-shop-preview{background:#FFE600;border-radius:10px;padding:14px;text-align:center;border:3px solid #cc0000;width:90%;max-width:320px;cursor:pointer;transition:transform .15s}
+.sc-shop-preview:hover{transform:scale(1.02)}
+.sc-777-big{font-size:2.4rem;font-weight:900;color:#cc0000;text-shadow:3px 3px 0 #800000;display:block}
+
+/* ══ Scratch game ══ */
+#scratch-game{display:flex;flex-direction:column;align-items:center;padding:10px;gap:8px;flex:1}
+#sc-card{width:100%;max-width:460px;background:#FFE600;border-radius:10px;overflow:hidden;font-family:'Segoe UI',sans-serif;box-shadow:0 4px 24px rgba(0,0,0,.6)}
+#sc-header{padding:8px 10px}
+.sc-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.sc-price{background:#cc0000;color:#fff;font-size:.68rem;font-weight:900;padding:2px 8px;border-radius:4px}
+.sc-777{font-size:2rem;font-weight:900;color:#cc0000;text-shadow:2px 2px 0 #800000;line-height:1}
+.sc-serial{font-size:.6rem;color:#666;border:1px solid #999;padding:1px 6px;border-radius:3px}
+.sc-rule-text{font-size:.58rem;color:#333;max-width:180px;line-height:1.3;text-align:right}
+.sc-jackpot{font-size:1rem;font-weight:900;color:#cc0000;margin-top:2px}
+/* ══ Scratch area ══ */
+#sc-area{position:relative;display:flex;gap:6px;padding:8px;background:#7FDCF0;border-top:3px solid #cc0000;border-bottom:3px solid #cc0000;min-height:160px}
+#sc-left{flex:1}
+#sc-left-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:3px;height:136px}
+.sc-lcell{background:#fff;border:2px solid #cc0000;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 1px}
+.sc-lcell-amt{font-size:.72rem;font-weight:900;color:#cc0000;line-height:1}
+.sc-lcell-lbl{font-size:.38rem;color:#888;text-align:center}
+#sc-right{flex:1;position:relative;display:flex;flex-direction:column;gap:4px}
+.sc-prize-box{background:#fff;border:2px solid #cc0000;border-radius:4px;padding:2px 6px;text-align:center}
+.sc-prize-lbl{font-size:.5rem;color:#666}
+.sc-prize-val{font-size:.82rem;font-weight:900;color:#cc0000;display:block}
+#sc-right-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;flex:1}
+.sc-rcell{background:#fff;border:2px solid #cc0000;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:38px}
+.sc-rnum{font-size:1.1rem;font-weight:900;font-style:italic;color:#444;line-height:1}
+.sc-rnum.is07{color:#cc0000}
+.sc-rlbl{font-size:.4rem;color:#aaa}
+#sc-footer{padding:5px 10px;font-size:.58rem;color:#333;border-top:2px dashed #cc0000;background:#FFE600;line-height:1.4}
+/* canvas */
+#scratch-canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
+/* win effects */
+.sc-lcell.win-match{background:#fffacd !important;border-color:#f00 !important;box-shadow:0 0 10px gold;animation:scPop .35s ease 5}
+.sc-rcell.win-line{background:#fffacd !important;border-color:#f00 !important;box-shadow:0 0 10px gold;animation:scPop .35s ease 5}
+.sc-lcell.lucky7{background:#FFE600 !important;border-color:#f00 !important;animation:scPop .35s ease 6}
+@keyframes scPop{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
+/* ══ Bingo section ══ */
+#bingo-section{border-top:2px solid #312e81}
+#bottom-split{display:flex;min-height:0}
 </style>
 </head>
 <body>
@@ -147,6 +205,8 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
   </div>
 </header>
 
+<div id="top-section">
+<div id="video-col">
 <!-- ═══ VIDEO SECTION ═══ -->
 <div id="video-section">
   <video id="live-stream" autoplay muted playsinline>
@@ -186,8 +246,78 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
     <div class="settle-box" id="settle-box-inner"></div>
   </div>
 </div>
+</div><!-- /#video-col -->
 
+<!-- ═══ SCRATCH COL ═══ -->
+<div id="scratch-col">
+  <!-- 商店畫面 -->
+  <div id="scratch-shop">
+    <div style="text-align:center">
+      <p style="color:#fbbf24;font-size:.75rem;font-weight:700;letter-spacing:.1em">✨ 虛擬刮刮樂</p>
+      <span class="sc-777-big">777</span>
+      <p style="color:#888;font-size:.65rem;margin-top:2px">LUCKY SEVEN</p>
+    </div>
+    <div class="sc-shop-preview" onclick="buyScratchCard()">
+      <p style="font-size:.78rem;color:#cc0000;font-weight:700;margin-bottom:6px">🎴 點此購買刮刮樂</p>
+      <p style="font-size:1.7rem;font-weight:900;color:#333">NT $100</p>
+      <p style="font-size:.62rem;color:#666;margin-top:4px">總中獎率 30.11%</p>
+    </div>
+    <div style="text-align:center;color:#666;font-size:.67rem;line-height:1.9">
+      <p>🎯 左側刮出 3 個相同金額 → 得獎</p>
+      <p>🎯 出現「7」→ 得 $700</p>
+      <p>🎯 右側任一行 3 個「07」→ 得獎金欄獎額</p>
+    </div>
+    <p style="color:#888;font-size:.62rem">目前點數：<span id="sc-credits" style="color:#fbbf24;font-weight:700">$1,000</span></p>
+  </div>
 
+  <!-- 遊戲畫面 -->
+  <div id="scratch-game" style="display:none;flex-direction:column;align-items:center;padding:10px;gap:8px;flex:1">
+    <div id="sc-card">
+      <div id="sc-header">
+        <div class="sc-title-row">
+          <span class="sc-777">777</span>
+          <span class="sc-price">NT$100</span>
+          <span class="sc-serial" id="sc-serial-no">777-000000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:2px">
+          <p class="sc-jackpot">最高獎金 $2,000</p>
+          <p class="sc-rule-text">刮出3個相同金額即得獎<br>出現「7」得$700<br>右側連線3個「07」得獎金欄</p>
+        </div>
+      </div>
+      <div id="sc-area">
+        <div id="sc-left">
+          <p style="font-size:.5rem;color:#cc0000;font-weight:700;text-align:center;margin-bottom:2px">★ 刮開查看 ★</p>
+          <div id="sc-left-grid"></div>
+        </div>
+        <div id="sc-right">
+          <div class="sc-prize-box">
+            <p class="sc-prize-lbl">獎金欄</p>
+            <span class="sc-prize-val" id="sc-prize-val">$500</span>
+          </div>
+          <div id="sc-right-grid"></div>
+        </div>
+        <canvas id="scratch-canvas"></canvas>
+      </div>
+      <div id="sc-footer">
+        本場已購：<span id="sc-count">0</span> 張 &nbsp;|&nbsp; 中獎率 30.11%
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;width:100%;max-width:460px">
+      <button onclick="autoRevealAll()" style="flex:1;padding:.5rem;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">⚡ 全部揭開</button>
+      <button onclick="resetScratch()" style="flex:1;padding:.5rem;background:#374151;color:#d1d5db;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">🎴 再買一張</button>
+    </div>
+    <div id="sc-result-msg" style="min-height:28px;text-align:center;font-weight:900;font-size:1rem"></div>
+  </div>
+</div><!-- /#scratch-col -->
+</div><!-- /#top-section -->
+
+<!-- ═══ BINGO SECTION ═══ -->
+<div id="bingo-section">
+<div style="padding:6px 12px;background:#080820;border-bottom:1px solid #1e1b4b;display:flex;align-items:center;gap:8px">
+  <span style="font-size:1.1rem">🎱</span>
+  <span style="font-size:.8rem;font-weight:700;color:#818cf8;letter-spacing:.1em">BINGO BINGO 投注區</span>
+  <span style="font-size:.65rem;color:#4b5563">↓ 向下滾動</span>
+</div>
 <!-- ═══ BOTTOM SPLIT ═══ -->
 <div id="bottom-split">
 
@@ -257,8 +387,8 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
       <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
         <div class="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <p class="s-lbl">投注金額（每注）</p>
-            <div class="flex flex-wrap gap-1" id="amt-selector-bs"></div>
+            <p class="s-lbl">投注注數 <span class="text-gray-500 normal-case font-normal text-[10px]">（1注=$25）</span></p>
+            <div class="flex gap-1" id="cols-selector-bs"></div>
           </div>
           <div>
             <p class="s-lbl">連續期數</p>
@@ -375,13 +505,13 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
     <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
       <p class="s-lbl">近10期走勢</p>
       <div class="overflow-x-auto">
-        <table class="w-full text-[10px]">
+        <table class="w-full text-xs">
           <thead>
-            <tr class="text-indigo-500 border-b border-indigo-900">
-              <th class="text-left pb-1.5 font-bold">期號</th>
-              <th class="pb-1.5 font-bold">開出號碼</th>
-              <th class="pb-1.5 font-bold">大小</th>
-              <th class="pb-1.5 font-bold">單雙</th>
+            <tr class="text-indigo-400 border-b border-indigo-900">
+              <th class="text-left pb-2 font-bold">期號</th>
+              <th class="pb-2 font-bold">開出號碼</th>
+              <th class="pb-2 font-bold">大小</th>
+              <th class="pb-2 font-bold">單雙</th>
             </tr>
           </thead>
           <tbody id="history-tbody">
@@ -399,7 +529,8 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
       </div>
     </div>
   </div>
-</div>
+</div><!-- /#bottom-split -->
+</div><!-- /#bingo-section -->
 
 
 <!-- ═══ WIN BURST ═══ -->
@@ -514,7 +645,7 @@ let state = {
   starPeriods: 1,
   bsBigChoice: null,
   bsOddChoice: null,
-  bsAmt: 25,
+  bsCols: 1,
   bsPeriods: 1,
   spNum: null,
   spAmt: 25,
@@ -1108,12 +1239,8 @@ async function animateDraw(numbers) {
 function highlightMatches(drawnNums) {
   document.querySelectorAll('.num-btn[data-num]').forEach(btn => {
     const n = parseInt(btn.dataset.num);
-    if (drawnNums.includes(n)) {
-      if (btn.classList.contains('selected')) {
-        btn.classList.add('matched');
-      } else {
-        btn.classList.add('drawn');
-      }
+    if (drawnNums.includes(n) && btn.classList.contains('selected')) {
+      btn.classList.add('matched');
     } else {
       btn.classList.remove('drawn', 'matched');
     }
@@ -1216,10 +1343,10 @@ function placeBet(type) {
       amount: BET_COST * state.starCols };
   } else if (type === 'bigsmall') {
     if (!state.bsBigChoice && !state.bsOddChoice) { showToast('請選擇大/小或單/雙'); return; }
-    cost = state.bsAmt * state.bsPeriods;
+    cost = BET_COST * state.bsCols * state.bsPeriods;
     if (state.credits < cost) { showToast('點數不足！'); return; }
     bet = { ...bet, bigChoice: state.bsBigChoice, oddChoice: state.bsOddChoice,
-      amount: state.bsAmt, periodsLeft: state.bsPeriods, totalPeriods: state.bsPeriods };
+      amount: BET_COST * state.bsCols, periodsLeft: state.bsPeriods, totalPeriods: state.bsPeriods };
   } else if (type === 'super') {
     if (!state.spNum) { showToast('請選擇一個超級獎號'); return; }
     cost = state.spAmt * state.spPeriods;
@@ -1324,6 +1451,7 @@ function renderCredits(animate = false) {
     void el.offsetWidth;
     el.classList.add('cred-up');
   }
+  updateScCredits();
 }
 
 function updatePeriodDisplay() {
@@ -1378,10 +1506,8 @@ function renderNumberGrid() {
     btn.dataset.num = n;
     btn.textContent = String(n).padStart(2, '0');
     if (state.selectedNums.includes(n)) btn.classList.add('selected');
-    if (state.currentDraw) {
-      if (state.currentDraw.numbers.includes(n)) {
-        btn.classList.add(state.selectedNums.includes(n) ? 'matched' : 'drawn');
-      }
+    if (state.currentDraw && state.currentDraw.numbers.includes(n) && state.selectedNums.includes(n)) {
+      btn.classList.add('matched');
     }
     btn.addEventListener('click', () => toggleNum(n));
     grid.appendChild(btn);
@@ -1525,14 +1651,14 @@ function renderHistory() {
   }
   tbody.innerHTML = state.drawHistory.map(h => `
     <tr class="border-b border-indigo-950">
-      <td class="text-left py-1 text-gray-400">${h.period ? String(h.period).slice(-5) : '--'}</td>
-      <td class="py-1 text-center">
-        <div class="flex flex-wrap gap-0.5 justify-center max-w-[160px] mx-auto">
-          ${h.numbers.map((n, i) => `<span class="${i===19 ? 'text-yellow-400' : 'text-gray-300'}">${String(n).padStart(2,'0')}</span>`).join(' ')}
+      <td class="text-left py-1.5 text-gray-400 text-xs font-mono">${h.period ? String(h.period).slice(-5) : '--'}</td>
+      <td class="py-1.5 text-center">
+        <div class="flex flex-wrap gap-0.5 justify-center">
+          ${h.numbers.map((n, i) => `<span class="text-[11px] font-mono ${i===19 ? 'text-yellow-400 font-bold' : 'text-gray-300'}">${String(n).padStart(2,'0')}</span>`).join(' ')}
         </div>
       </td>
-      <td class="text-center py-1 ${h.isBig ? 'text-cyan-400' : h.isSmall ? 'text-red-400' : 'text-gray-500'} font-bold">${h.isBig ? '大' : h.isSmall ? '小' : '－'}</td>
-      <td class="text-center py-1 ${h.isOdd ? 'text-purple-400' : h.isEven ? 'text-green-400' : 'text-gray-500'} font-bold">${h.isOdd ? '單' : h.isEven ? '雙' : '－'}</td>
+      <td class="text-center py-1.5 text-sm font-black ${h.isBig ? 'text-cyan-400' : h.isSmall ? 'text-red-400' : 'text-gray-500'}">${h.isBig ? '大' : h.isSmall ? '小' : '－'}</td>
+      <td class="text-center py-1.5 text-sm font-black ${h.isOdd ? 'text-purple-400' : h.isEven ? 'text-green-400' : 'text-gray-500'}">${h.isOdd ? '單' : h.isEven ? '雙' : '－'}</td>
     </tr>`).join('');
 }
 
@@ -1599,7 +1725,7 @@ function renderPayoutRef() {
 
 function updateBetCosts() {
   const starCost = BET_COST * state.starCols * state.starPeriods;
-  const bsCost = state.bsAmt * state.bsPeriods;
+  const bsCost = BET_COST * state.bsCols * state.bsPeriods;
   const spCost = state.spAmt * state.spPeriods;
   const sc = document.getElementById('star-cost');
   const bc = document.getElementById('bs-cost');
@@ -1637,8 +1763,7 @@ function toggleNum(n) {
   if (btn) {
     btn.classList.toggle('selected', idx < 0);
     if (state.currentDraw && state.currentDraw.numbers.includes(n)) {
-      if (idx < 0) { btn.classList.remove('drawn'); btn.classList.add('matched'); }
-      else { btn.classList.remove('matched'); btn.classList.add('drawn'); }
+      btn.classList.toggle('matched', idx < 0);
     }
   }
   document.getElementById('sel-count').textContent = state.selectedNums.length;
@@ -1768,8 +1893,8 @@ function init() {
   renderStarSelector();
   renderMultiSelector('cols-selector-star', 'starCols', [1,2,3,4,5]);
   renderMultiSelector('periods-selector-star', 'starPeriods', [1,2,3,4,5]);
-  renderAmtSelector('amt-selector-bs', 'bsAmt');
-  renderMultiSelector('periods-selector-bs', 'bsPeriods', [1,2,3,4,5]);
+  renderMultiSelector('cols-selector-bs', 'bsCols', [1,2,3,4]);
+  renderMultiSelector('periods-selector-bs', 'bsPeriods', [1,2,3,4]);
   renderAmtSelector('amt-selector-sp', 'spAmt');
   renderMultiSelector('periods-selector-sp', 'spPeriods', [1,2,3,4,5]);
 
@@ -1800,6 +1925,258 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ══════════════════════════════════════
+//  SCRATCH CARD GAME (刮刮樂)
+// ══════════════════════════════════════
+const SC_COST = 100;
+const SC_AMOUNTS = [50, 100, 200, 500, 1000, 2000];
+const SC_PRIZE_OPTIONS = [200, 500, 1000, 2000];
+const SC_RIGHT_POOL = ['14','21','28','35','42','49','56','63','70'];
+
+let sc = {
+  bought: 0,
+  active: false,
+  revealed: false,
+  result: null,
+  canvas: null,
+  ctx: null,
+  isDrawing: false
+};
+
+function updateScCredits() {
+  const el = document.getElementById('sc-credits');
+  if (el) el.textContent = `$${state.credits.toLocaleString()}`;
+}
+
+function buyScratchCard() {
+  if (state.credits < SC_COST) { showToast('點數不足，無法購買刮刮樂！'); return; }
+  state.credits -= SC_COST;
+  sc.bought++;
+  renderCredits(true);
+  saveState();
+
+  sc.result = generateScratchResult();
+  sc.revealed = false;
+  sc.active = true;
+
+  document.getElementById('scratch-shop').style.display = 'none';
+  const game = document.getElementById('scratch-game');
+  game.style.display = 'flex';
+
+  renderScratchCard();
+  document.getElementById('sc-serial-no').textContent = `777-${String(sc.bought).padStart(6,'0')}`;
+  document.getElementById('sc-count').textContent = sc.bought;
+  document.getElementById('sc-result-msg').textContent = '';
+  document.getElementById('sc-result-msg').style.color = '';
+
+  // small delay so DOM lays out before canvas sizing
+  setTimeout(initScratchCanvas, 60);
+  showToast(`🎴 刮刮樂購買成功！扣除 $${SC_COST}`);
+}
+
+function makeLosingLeft() {
+  // 6 cells, no 3 identical, no '7'
+  const pool = [...SC_AMOUNTS].sort(() => Math.random() - .5);
+  // 2 of pool[0], 1 each of pool[1..3], 1 more of pool[4]
+  const cells = [pool[0], pool[0], pool[1], pool[2], pool[3], pool[4]];
+  return cells.sort(() => Math.random() - .5);
+}
+
+function generateScratchResult() {
+  const rng = Math.random();
+  let winType = 'none', winAmount = 0;
+  let leftCells = [], rightCells = [];
+  const prizeAmt = SC_PRIZE_OPTIONS[Math.floor(Math.random() * SC_PRIZE_OPTIONS.length)];
+
+  const randRight = () => SC_RIGHT_POOL[Math.floor(Math.random() * SC_RIGHT_POOL.length)];
+
+  if (rng < 0.15) {
+    // Left match
+    winType = 'left_match';
+    const amt = SC_AMOUNTS[Math.floor(Math.random() * SC_AMOUNTS.length)];
+    winAmount = amt;
+    const others = SC_AMOUNTS.filter(a => a !== amt).sort(() => Math.random() - .5).slice(0, 3);
+    leftCells = [amt, amt, amt, ...others].sort(() => Math.random() - .5);
+    rightCells = Array(9).fill(null).map(randRight);
+
+  } else if (rng < 0.20) {
+    // Lucky 7
+    winType = 'lucky7';
+    winAmount = 700;
+    leftCells = ['7', ...SC_AMOUNTS.sort(() => Math.random() - .5).slice(0,5)].sort(() => Math.random() - .5);
+    rightCells = Array(9).fill(null).map(randRight);
+
+  } else if (rng < 0.3011) {
+    // Right line win
+    winType = 'right_line';
+    winAmount = prizeAmt;
+    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    const chosen = lines[Math.floor(Math.random() * lines.length)];
+    rightCells = Array(9).fill(null).map(randRight);
+    chosen.forEach(i => { rightCells[i] = '07'; });
+    leftCells = makeLosingLeft();
+
+  } else {
+    winType = 'none';
+    leftCells = makeLosingLeft();
+    rightCells = Array(9).fill(null).map(randRight);
+  }
+
+  return { winType, winAmount, leftCells, rightCells, prizeAmt };
+}
+
+function renderScratchCard() {
+  const r = sc.result;
+
+  // Left 3×2 grid
+  const lg = document.getElementById('sc-left-grid');
+  lg.innerHTML = '';
+  r.leftCells.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'sc-lcell';
+    cell.id = `sc-lc-${i}`;
+    if (val === '7') {
+      cell.innerHTML = `<span class="sc-lcell-amt" style="font-size:1.3rem">7</span><span class="sc-lcell-lbl">幸運7</span>`;
+    } else {
+      cell.innerHTML = `<span class="sc-lcell-amt">$${Number(val).toLocaleString()}</span><span class="sc-lcell-lbl">元</span>`;
+    }
+    lg.appendChild(cell);
+  });
+
+  // Prize amount
+  document.getElementById('sc-prize-val').textContent = `$${r.prizeAmt.toLocaleString()}`;
+
+  // Right 3×3 grid
+  const rg = document.getElementById('sc-right-grid');
+  rg.innerHTML = '';
+  r.rightCells.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'sc-rcell';
+    cell.id = `sc-rc-${i}`;
+    cell.innerHTML = `<span class="sc-rnum${val === '07' ? ' is07' : ''}">${val}</span><span class="sc-rlbl">號</span>`;
+    rg.appendChild(cell);
+  });
+}
+
+function initScratchCanvas() {
+  const area = document.getElementById('sc-area');
+  const canvas = document.getElementById('scratch-canvas');
+  if (!area || !canvas) return;
+
+  canvas.width  = area.offsetWidth;
+  canvas.height = area.offsetHeight;
+  sc.canvas = canvas;
+  sc.ctx = canvas.getContext('2d');
+
+  // Draw silver mask
+  const ctx = sc.ctx;
+  ctx.fillStyle = '#B8B8B8';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Texture
+  ctx.fillStyle = 'rgba(100,100,100,.25)';
+  ctx.font = 'bold 10px sans-serif';
+  for (let y = 14; y < canvas.height; y += 18) {
+    for (let x = 2; x < canvas.width; x += 56) {
+      ctx.fillText('刮刮樂 777', x, y);
+    }
+  }
+
+  // Events
+  canvas.onmousedown  = e => { sc.isDrawing = true; doScratch(e); };
+  canvas.onmousemove  = e => { if (sc.isDrawing) doScratch(e); };
+  canvas.onmouseup    = () => { sc.isDrawing = false; checkScratchComplete(); };
+  canvas.onmouseleave = () => { sc.isDrawing = false; };
+  canvas.ontouchstart = e => { e.preventDefault(); sc.isDrawing = true; doScratch(e.touches[0]); };
+  canvas.ontouchmove  = e => { e.preventDefault(); doScratch(e.touches[0]); };
+  canvas.ontouchend   = () => { sc.isDrawing = false; checkScratchComplete(); };
+}
+
+function getCanvasPos(e) {
+  const rect = sc.canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (sc.canvas.width  / rect.width),
+    y: (e.clientY - rect.top)  * (sc.canvas.height / rect.height)
+  };
+}
+
+function doScratch(e) {
+  if (sc.revealed || !sc.ctx) return;
+  const pos = getCanvasPos(e);
+  sc.ctx.globalCompositeOperation = 'destination-out';
+  sc.ctx.beginPath();
+  sc.ctx.arc(pos.x, pos.y, 24, 0, Math.PI * 2);
+  sc.ctx.fill();
+  sc.ctx.globalCompositeOperation = 'source-over';
+}
+
+function getScratchCoverage() {
+  if (!sc.ctx) return 0;
+  const d = sc.ctx.getImageData(0, 0, sc.canvas.width, sc.canvas.height).data;
+  let t = 0;
+  for (let i = 3; i < d.length; i += 4) { if (d[i] < 128) t++; }
+  return t / (sc.canvas.width * sc.canvas.height);
+}
+
+function checkScratchComplete() {
+  if (sc.revealed) return;
+  if (getScratchCoverage() > 0.45) autoRevealAll();
+}
+
+function autoRevealAll() {
+  if (!sc.active) return;
+  if (sc.ctx) sc.ctx.clearRect(0, 0, sc.canvas.width, sc.canvas.height);
+  sc.revealed = true;
+  settleScratchCard();
+}
+
+function settleScratchCard() {
+  const r = sc.result;
+  const msgEl = document.getElementById('sc-result-msg');
+
+  if (r.winAmount > 0) {
+    state.credits += r.winAmount;
+    renderCredits(true);
+    saveState();
+
+    // Highlight winning cells
+    if (r.winType === 'left_match') {
+      const cnt = {};
+      r.leftCells.forEach((v, i) => { if (!cnt[v]) cnt[v] = []; cnt[v].push(i); });
+      for (const [, idxs] of Object.entries(cnt)) {
+        if (idxs.length >= 3) idxs.forEach(i => document.getElementById(`sc-lc-${i}`)?.classList.add('win-match'));
+      }
+    } else if (r.winType === 'lucky7') {
+      r.leftCells.forEach((v, i) => { if (v === '7') document.getElementById(`sc-lc-${i}`)?.classList.add('lucky7'); });
+    } else if (r.winType === 'right_line') {
+      const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+      for (const line of lines) {
+        if (line.every(i => r.rightCells[i] === '07')) {
+          line.forEach(i => document.getElementById(`sc-rc-${i}`)?.classList.add('win-line'));
+          break;
+        }
+      }
+    }
+
+    msgEl.style.color = '#4ade80';
+    msgEl.textContent = `🎉 恭喜中獎！+$${r.winAmount.toLocaleString()}`;
+    showToast(`🎴 刮刮樂中獎！+$${r.winAmount}`);
+    showWinBurst(r.winAmount);
+  } else {
+    msgEl.style.color = '#f87171';
+    msgEl.textContent = '😢 未中獎，再試一次！';
+  }
+}
+
+function resetScratch() {
+  sc.active = false;
+  sc.revealed = false;
+  sc.result = null;
+  updateScCredits();
+  document.getElementById('scratch-game').style.display = 'none';
+  document.getElementById('scratch-shop').style.display = 'flex';
+}
 </script>
 </body>
 </html>
