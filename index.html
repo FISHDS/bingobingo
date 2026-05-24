@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 .neon-purple{color:#c084fc;text-shadow:0 0 8px #c084fc,0 0 20px #c084fc,0 0 40px #8b5cf6}
 .neon-cyan{color:#22d3ee;text-shadow:0 0 8px #22d3ee,0 0 20px #22d3ee,0 0 40px #06b6d4}
 .neon-gold{color:#fbbf24;text-shadow:0 0 8px #fbbf24,0 0 20px #fbbf24,0 0 40px #f59e0b}
@@ -22,7 +22,7 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
 @keyframes dropIn{0%{transform:scale(0) translateY(-25px);opacity:0}65%{transform:scale(1.18) translateY(4px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
 
 /* Number picker */
-.num-btn{width:33px;height:29px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;cursor:pointer;background:#1e1b4b;border:1px solid #312e81;color:#818cf8;transition:all .12s;user-select:none;-webkit-user-select:none}
+.num-btn{height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;cursor:pointer;background:#1e1b4b;border:1px solid #312e81;color:#818cf8;transition:all .12s;user-select:none;-webkit-user-select:none}
 .num-btn:hover:not(.disabled-btn){background:#2d2a72;border-color:#6366f1;transform:scale(1.1)}
 .num-btn.selected{background:#f59e0b;border-color:#fbbf24;color:#1c1917;box-shadow:0 0 8px #f59e0b90}
 .num-btn.drawn{background:#059669;border-color:#10b981;color:#fff}
@@ -53,10 +53,21 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
 .ring-bg{stroke:#1e1b4b;stroke-width:4;fill:none}
 .ring-fg{stroke:#6366f1;stroke-width:4;fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
 
-/* Ticker */
-.ticker-wrap{overflow:hidden;position:relative}
-.ticker-inner{display:inline-flex;gap:.5rem;animation:scrollLeft 28s linear infinite;white-space:nowrap}
-@keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+/* Video section */
+#video-section{position:relative;width:100%;height:38vh;min-height:200px;background:#000;overflow:hidden;flex-shrink:0}
+#live-stream{width:100%;height:100%;object-fit:cover}
+.v-top{position:absolute;top:0;left:0;right:0;padding:7px 14px;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);display:flex;justify-content:space-between;align-items:center;z-index:10}
+.v-countdown{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;z-index:10;background:rgba(0,0,0,.55);padding:4px 14px;border-radius:20px;backdrop-filter:blur(4px)}
+#sprite-wrap{position:absolute;bottom:0;right:4%;z-index:11;width:120px;height:180px;overflow:hidden;pointer-events:none}
+#sprite-char{width:150px;height:200px;background-image:url(sprite.png);background-size:768px 1024px;background-repeat:no-repeat;image-rendering:pixelated;transform-origin:bottom left;transform:scale(0.8)}
+#settle-banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s}
+#settle-banner.show{opacity:1}
+.settle-box{padding:.8rem 2rem;border-radius:14px;text-align:center;font-size:1.4rem;font-weight:900;box-shadow:0 0 40px currentColor}
+@keyframes settleIn{0%{transform:scale(0) rotate(-6deg);opacity:0}65%{transform:scale(1.1) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+/* Bottom split */
+#bottom-split{display:flex;flex:1;overflow:hidden;min-height:0}
+.left-panel{width:50%;overflow-y:auto;padding:8px;border-right:1px solid #1e1b4b;display:flex;flex-direction:column;gap:8px}
+.right-panel{width:50%;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
 
 /* Section label */
 .s-lbl{font-size:.65rem;font-weight:700;letter-spacing:.15em;color:#6366f1;text-transform:uppercase;margin-bottom:.35rem}
@@ -103,7 +114,9 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
 
 @media(max-width:640px){
   .draw-ball{width:40px;height:40px;font-size:.75rem}
-  .num-btn{width:28px;height:25px;font-size:.6rem}
+  #video-section{height:28vh}
+  #bottom-split{flex-direction:column}
+  .left-panel,.right-panel{width:100%}
 }
 </style>
 </head>
@@ -134,34 +147,52 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
   </div>
 </header>
 
-<!-- ═══ PERIOD BAR ═══ -->
-<div class="bg-[#080820] border-b border-indigo-900 px-4 py-2 flex items-center justify-between gap-4">
-  <div>
-    <p class="s-lbl mb-0.5">當期期號</p>
-    <p class="text-base font-black text-indigo-300 leading-tight" id="period-display">--</p>
-  </div>
-  <div class="flex items-center gap-3 flex-1 justify-center">
-    <div class="text-center">
-      <p class="text-[10px] text-gray-500">封盤倒數</p>
-      <p class="text-2xl font-mono font-black neon-cyan leading-tight" id="countdown-display">05:00</p>
+<!-- ═══ VIDEO SECTION ═══ -->
+<div id="video-section">
+  <video id="live-stream" autoplay muted playsinline>
+    <source src="https://bingolive.mydwpc.myds.me:4433/bingolive.webm?tkn=670150814" type="video/webm">
+  </video>
+
+  <!-- 頂部資訊條 -->
+  <div class="v-top">
+    <div class="flex items-center gap-3">
+      <div>
+        <p class="text-[9px] text-indigo-400 tracking-widest uppercase">當期期號</p>
+        <p class="text-lg font-black text-indigo-200 leading-none" id="period-display">--</p>
+      </div>
     </div>
-    <svg width="48" height="48" viewBox="0 0 48 48" class="ring-svg flex-shrink-0">
+    <div class="flex items-center gap-2">
+      <p class="font-bold text-sm leading-tight" id="draw-status-text">等待開獎</p>
+    </div>
+  </div>
+
+  <!-- 倒數計時 -->
+  <div class="v-countdown">
+    <svg width="36" height="36" viewBox="0 0 48 48" class="ring-svg flex-shrink-0">
       <circle cx="24" cy="24" r="19" class="ring-bg"/>
       <circle cx="24" cy="24" r="19" class="ring-fg" id="ring-fg" stroke-dasharray="119.38" stroke-dashoffset="0"/>
     </svg>
+    <p class="text-2xl font-mono font-black neon-cyan leading-none" id="countdown-display">05:00</p>
+    <p class="text-[10px] text-gray-400">封盤倒數</p>
   </div>
-  <div class="text-right">
-    <p class="s-lbl mb-0.5">開獎狀態</p>
-    <p class="font-bold text-sm leading-tight" id="draw-status-text">等待開獎</p>
+
+  <!-- 太太角色 -->
+  <div id="sprite-wrap">
+    <div id="sprite-char"></div>
+  </div>
+
+  <!-- 結算橫幅（替代彈窗） -->
+  <div id="settle-banner">
+    <div class="settle-box" id="settle-box-inner"></div>
   </div>
 </div>
 
 
-<!-- ═══ MAIN CONTENT ═══ -->
-<div class="flex flex-col lg:flex-row gap-3 p-3 max-w-7xl mx-auto">
+<!-- ═══ BOTTOM SPLIT ═══ -->
+<div id="bottom-split">
 
   <!-- ╔══ LEFT: BET PANEL ══╗ -->
-  <div class="lg:w-[52%] flex flex-col gap-3">
+  <div class="left-panel">
 
     <!-- Tabs -->
     <div class="flex gap-1.5 bg-[#0a0a2e] p-1.5 rounded-xl border border-indigo-900">
@@ -295,7 +326,7 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
   </div>
 
   <!-- ╔══ RIGHT: DRAW BOARD ══╗ -->
-  <div class="lg:w-[48%] flex flex-col gap-3">
+  <div class="right-panel">
 
     <!-- Main draw display -->
     <div class="bg-[#0a0a2e] rounded-xl p-4 border border-indigo-900" id="draw-board">
@@ -370,29 +401,6 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
   </div>
 </div>
 
-<!-- ═══ SETTLEMENT MODAL ═══ -->
-<div class="modal-bg hidden" id="modal-overlay">
-  <div class="modal-box p-5" id="modal-box">
-    <div class="text-center mb-4">
-      <p class="text-xs text-indigo-400 tracking-widest uppercase">期號結算</p>
-      <h2 class="text-2xl font-black mt-1" id="modal-period-label">--</h2>
-    </div>
-    <div id="modal-results" class="space-y-2 mb-4"></div>
-    <div class="border-t border-indigo-900 pt-3 mb-4">
-      <div class="flex justify-between items-center">
-        <span class="text-sm text-gray-400">本期淨損益</span>
-        <span class="text-2xl font-black" id="modal-net">--</span>
-      </div>
-      <div class="flex justify-between items-center mt-1">
-        <span class="text-sm text-gray-400">剩餘點數</span>
-        <span class="text-xl font-bold text-yellow-400" id="modal-credits">--</span>
-      </div>
-    </div>
-    <button onclick="closeModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-all">
-      收下結果，繼續投注 ✓
-    </button>
-  </div>
-</div>
 
 <!-- ═══ WIN BURST ═══ -->
 <div class="win-burst hidden" id="win-burst">
@@ -400,6 +408,39 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:1
 </div>
 
 <script>
+// ══════════════════════════════════════
+//  SPRITE ANIMATION
+// ══════════════════════════════════════
+// sprite.png: 768×1024, 5 cols × 5 rows, each frame ~150×200px
+const SPRITE_STATES = {
+  idle:    { frames: [{x:0,   y:0}],                             fps: 1 },
+  walking: { frames: [{x:0,   y:200}, {x:150, y:200}],           fps: 4 },
+  daubing: { frames: [{x:300, y:200}, {x:450, y:200}],           fps: 3 },
+  victory: { frames: [{x:0,   y:400}, {x:150, y:400}],           fps: 3 },
+  sad:     { frames: [{x:300, y:400}, {x:450, y:400}],           fps: 2 },
+  winBig:  { frames: [{x:0,   y:600}, {x:150, y:600}, {x:300, y:600}], fps: 4 },
+  winMega: { frames: [{x:0,   y:800}, {x:150, y:800}],           fps: 3 },
+};
+let _spriteTimer = null;
+let _spriteFrameIdx = 0;
+
+function setSpriteState(name, durationMs = 0) {
+  clearInterval(_spriteTimer);
+  _spriteFrameIdx = 0;
+  const st = SPRITE_STATES[name] || SPRITE_STATES.idle;
+  const el = document.getElementById('sprite-char');
+  if (!el) return;
+
+  function tick() {
+    const f = st.frames[_spriteFrameIdx % st.frames.length];
+    el.style.backgroundPosition = `-${f.x}px -${f.y}px`;
+    _spriteFrameIdx++;
+  }
+  tick();
+  if (st.frames.length > 1) _spriteTimer = setInterval(tick, 1000 / st.fps);
+  if (durationMs > 0) setTimeout(() => setSpriteState('idle'), durationMs);
+}
+
 // ══════════════════════════════════════
 //  CONSTANTS & CONFIG
 // ══════════════════════════════════════
@@ -1648,41 +1689,41 @@ function updateFetchStatus() {
 }
 
 // ══════════════════════════════════════
-//  SETTLEMENT MODAL
+//  SETTLEMENT BANNER（無彈窗版）
 // ══════════════════════════════════════
 function showSettlementModal(results, period) {
   let totalWin = 0, totalPaid = 0, anyWin = false;
-
-  const rows = results.map(r => {
+  for (const r of results) {
     totalWin += r.winAmount;
     totalPaid += r.bet.amount;
     if (r.winAmount > 0) anyWin = true;
-    const isWin = r.winAmount > 0;
-    return `<div class="bet-card ${isWin ? 'bet-win' : 'bet-loss'} mb-2">
-      <p class="text-xs text-gray-300 mb-0.5">${r.resultDesc}</p>
-      <div class="flex justify-between items-center">
-        <span class="text-[10px] text-gray-500">$${r.bet.amount} → </span>
-        <span class="font-bold text-sm ${isWin ? 'text-green-400' : 'text-red-400'}">
-          ${isWin ? `+$${r.winAmount}` : '-$' + r.bet.amount}
-        </span>
-      </div>
-    </div>`;
-  }).join('');
-
+  }
   const net = totalWin - totalPaid;
-  document.getElementById('modal-period-label').textContent = `第 ${period} 期`;
-  document.getElementById('modal-results').innerHTML = rows || '<p class="text-gray-500 text-sm text-center">無投注</p>';
-  document.getElementById('modal-net').textContent = `${net >= 0 ? '+' : ''}$${net}`;
-  document.getElementById('modal-net').className = `text-2xl font-black ${net >= 0 ? 'neon-green' : 'neon-red'}`;
-  document.getElementById('modal-credits').textContent = `$${state.credits.toLocaleString()}`;
-  document.getElementById('modal-overlay').classList.remove('hidden');
 
+  // 影片區橫幅
+  const banner = document.getElementById('settle-banner');
+  const inner  = document.getElementById('settle-box-inner');
+  if (banner && inner) {
+    const isWin = net > 0;
+    const isBig = net >= 500;
+    inner.style.cssText = `color:${isWin ? '#4ade80' : '#f87171'};background:${isWin ? 'rgba(6,78,59,.85)' : 'rgba(127,29,29,.85)'};border:2px solid ${isWin ? '#10b981' : '#dc2626'};animation:settleIn .4s cubic-bezier(.34,1.56,.64,1)`;
+    inner.innerHTML = `<div style="font-size:1rem;opacity:.8">第 ${period} 期結算</div>
+      <div style="font-size:2rem">${isWin ? (isBig ? '💰 大贏！' : '🎉 中獎！') : '😢 未中'}</div>
+      <div style="font-size:1.3rem">${net >= 0 ? '+' : ''}$${net}</div>`;
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 3500);
+  }
+
+  // 角色動畫
+  if (net > 1000) setSpriteState('winMega', 4000);
+  else if (net > 0) setSpriteState('victory', 3500);
+  else setSpriteState('sad', 3000);
+
+  // 大贏爆炸效果
   if (anyWin) showWinBurst(net);
 }
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.add('hidden');
-}
+function closeModal() {} // 保留空函數避免舊呼叫出錯
 
 function showWinBurst(amount) {
   const burst = document.getElementById('win-burst');
@@ -1751,7 +1792,10 @@ function init() {
   state.countdownTimer = setInterval(updateCountdown, 1000);
   updateCountdown();
 
-  // 精準排程：開獎後 65 秒再抓
+  // 角色初始化
+  setSpriteState('idle');
+
+  // 精準排程：開獎後 60 秒再抓
   scheduleNextFetch();
 }
 
