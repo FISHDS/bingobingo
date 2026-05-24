@@ -223,7 +223,7 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 #bet-scene-overlay{position:absolute;inset:0;z-index:30;opacity:0;transition:opacity .4s;pointer-events:none;border-radius:inherit}
 #bet-scene-overlay.show{opacity:1}
 #bet-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-#bet-wife-img{position:absolute;bottom:0;left:35%;height:85%;width:auto;object-fit:contain;image-rendering:pixelated;transition:opacity .2s}
+#bet-wife-img{position:absolute;bottom:-6%;left:35%;height:85%;width:auto;object-fit:contain;image-rendering:pixelated;transition:opacity .2s}
 </style>
 </head>
 <body>
@@ -1461,21 +1461,26 @@ function triggerBetSceneAnimation() {
   if (window._betPoseTimer) { clearInterval(window._betPoseTimer); window._betPoseTimer = null; }
   if (window._betHideTimer) { clearTimeout(window._betHideTimer); window._betHideTimer = null; }
 
-  // 兩個透明去背站姿交替
-  const poses = ['blackview.png', 'BACK.png'];
+  // 兩個透明去背站姿交替，各自有微調位置
+  const poses = [
+    { src: 'blackview.png', left: '35%' },
+    { src: 'BACK.png',      left: '28%' }  // 第二張往左
+  ];
   let poseIdx = 0;
-  wifeImg.src = poses[0];
+  wifeImg.src = poses[0].src;
+  wifeImg.style.left = poses[0].left;
   wifeImg.style.opacity = '1';
 
   // 顯示覆蓋層
   overlay.classList.add('show');
 
-  // 每 800ms 切換姿勢（淡出 → 換圖 → 淡入）
+  // 每 800ms 切換姿勢（淡出 → 換圖+位置 → 淡入）
   window._betPoseTimer = setInterval(() => {
     wifeImg.style.opacity = '0';
     setTimeout(() => {
       poseIdx = (poseIdx + 1) % 2;
-      wifeImg.src = poses[poseIdx];
+      wifeImg.src   = poses[poseIdx].src;
+      wifeImg.style.left = poses[poseIdx].left;
       wifeImg.style.opacity = '1';
     }, 220);
   }, 800);
@@ -1486,6 +1491,7 @@ function triggerBetSceneAnimation() {
     window._betPoseTimer = null;
     overlay.classList.remove('show');
     wifeImg.src = 'blackview.png';
+    wifeImg.style.left = '35%';
     wifeImg.style.opacity = '1';
   }, 4000);
 }
