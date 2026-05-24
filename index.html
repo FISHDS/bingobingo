@@ -218,17 +218,12 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 #bingo-section{border-top:2px solid #312e81}
 #bottom-split{display:flex;min-height:0}
 
-/* ══ 投注走路動畫 ══ */
-#walk-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(0,0,0,.82);opacity:0;transition:opacity .4s;pointer-events:none}
-#walk-overlay.active{display:flex}
-#walk-overlay.visible{opacity:1}
-#walk-scene{position:relative;width:min(92vw,440px);height:min(62vw,300px);border-radius:12px;overflow:hidden;border:2px solid #4f46e5;box-shadow:0 0 50px rgba(99,102,241,.6)}
-#walk-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-/* 用 background-image 取代 <img>，避免 overflow+transform 剪裁失效 */
-#walk-sprite-container{position:absolute;bottom:0;height:55%;width:33%;background-image:url(WALK.jpg);background-size:400% 100%;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;transform:scaleX(-1)}
-#walk-back-img{position:absolute;bottom:0;left:30%;height:60%;width:auto;object-fit:contain;image-rendering:pixelated;opacity:0;transition:opacity .3s}
-#walk-back-img.show{opacity:1}
-@keyframes walkAcross{from{left:-40%}to{left:38%}}
+/* ══ 投注場景覆蓋層（蓋在開獎板上） ══ */
+#draw-board{position:relative;overflow:hidden}
+#bet-scene-overlay{position:absolute;inset:0;z-index:30;opacity:0;transition:opacity .4s;pointer-events:none;border-radius:inherit}
+#bet-scene-overlay.show{opacity:1}
+#bet-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+#bet-wife-img{position:absolute;bottom:0;left:35%;height:85%;width:auto;object-fit:contain;image-rendering:pixelated;mix-blend-mode:multiply;transition:opacity .2s}
 </style>
 </head>
 <body>
@@ -542,6 +537,11 @@ body{height:auto !important;overflow:auto !important;display:block !important}
         </div>
       </div>
 
+      <!-- 投注場景覆蓋層（蓋住開獎號碼板） -->
+      <div id="bet-scene-overlay">
+        <img id="bet-bg-img" src="BG.png" alt="">
+        <img id="bet-wife-img" src="blackview.png" alt="">
+      </div>
     </div>
 
     <!-- History table -->
@@ -615,15 +615,6 @@ body{height:auto !important;overflow:auto !important;display:block !important}
     <span class="mnav-icon">📊</span>走勢
   </button>
 </nav>
-
-<!-- ═══ 投注走路動畫覆蓋層 ═══ -->
-<div id="walk-overlay">
-  <div id="walk-scene">
-    <img id="walk-bg-img" src="BG.png" alt="">
-    <div id="walk-sprite-container" style="left:-40%"></div>
-    <img id="walk-back-img" src="blackview.png" alt="" style="display:none">
-  </div>
-</div>
 
 <!-- ═══ WIN BURST ═══ -->
 <div class="win-burst hidden" id="win-burst">
@@ -1448,7 +1439,7 @@ function placeBet(type) {
   renderCredits(true);
   renderPendingBets();
   showToast(`✅ 下注成功！扣除 $${cost}`);
-  triggerWalkAnimation(); // 太太走向櫃台下注動畫
+  triggerBetSceneAnimation(); // 太太在彩券行站姿動畫
 
   // Reset selections after bet
   if (type === 'star') { clearSelectedNums(); }
@@ -1459,64 +1450,44 @@ function placeBet(type) {
 }
 
 // ══════════════════════════════════════
-//  WALK ANIMATION (投注走向櫃台)
+//  投注場景動畫（蓋在開獎板，兩姿勢交替）
 // ══════════════════════════════════════
-// 4 格 WALK.jpg 的 background-position（background-size:400% 時）
-const WALK_FRAMES = ['0% 0', '33.33% 0', '66.67% 0', '100% 0'];
-
-function triggerWalkAnimation() {
-  const overlay    = document.getElementById('walk-overlay');
-  const spriteCont = document.getElementById('walk-sprite-container');
-  const backImg    = document.getElementById('walk-back-img');
+function triggerBetSceneAnimation() {
+  const overlay  = document.getElementById('bet-scene-overlay');
+  const wifeImg  = document.getElementById('bet-wife-img');
   if (!overlay) return;
 
-  // 清除上次殘留的 frame timer
-  if (window._walkFrameTimer) { clearInterval(window._walkFrameTimer); window._walkFrameTimer = null; }
+  // 清除上次殘留計時器
+  if (window._betPoseTimer) { clearInterval(window._betPoseTimer); window._betPoseTimer = null; }
+  if (window._betHideTimer) { clearTimeout(window._betHideTimer); window._betHideTimer = null; }
 
-  // 用 background-image 方式重設容器（不需要 <img> 子元素，解決 overflow+transform 問題）
-  spriteCont.style.cssText =
-    'position:absolute;bottom:0;height:55%;width:33%;' +
-    'background-image:url(WALK.jpg);background-size:400% 100%;' +
-    'background-repeat:no-repeat;background-position:0 0;' +
-    'image-rendering:pixelated;transform:scaleX(-1);left:-40%';
+  // 兩個站姿（BACK.jpg 用 mix-blend-mode:multiply 去白底）
+  const poses = ['blackview.png', 'BACK.jpg'];
+  let poseIdx = 0;
+  wifeImg.src = poses[0];
+  wifeImg.style.opacity = '1';
 
-  backImg.classList.remove('show');
-  backImg.style.display = 'none';
-  spriteCont.style.display = '';
+  // 顯示覆蓋層
+  overlay.classList.add('show');
 
-  // 淡入遮罩
-  overlay.classList.add('active');
-  void overlay.offsetWidth;
-  overlay.classList.add('visible');
-
-  // 430ms 後開始走格 + 橫移
-  setTimeout(() => {
-    let fi = 0;
-    window._walkFrameTimer = setInterval(() => {
-      fi = (fi + 1) % 4;
-      spriteCont.style.backgroundPosition = WALK_FRAMES[fi];
-    }, 110); // ~9fps
-    spriteCont.style.animation = 'walkAcross 2.4s linear forwards';
-  }, 430);
-
-  // 走完後切換背影圖
-  setTimeout(() => {
-    if (window._walkFrameTimer) { clearInterval(window._walkFrameTimer); window._walkFrameTimer = null; }
-    spriteCont.style.display = 'none';
-    backImg.style.display = 'block';
-    void backImg.offsetWidth;
-    backImg.classList.add('show');
-  }, 2850);
-
-  // 再 1 秒後淡出
-  setTimeout(() => {
-    overlay.classList.remove('visible');
+  // 每 800ms 切換姿勢（淡出 → 換圖 → 淡入）
+  window._betPoseTimer = setInterval(() => {
+    wifeImg.style.opacity = '0';
     setTimeout(() => {
-      overlay.classList.remove('active');
-      backImg.classList.remove('show');
-      spriteCont.style.display = '';
-    }, 450);
-  }, 3850);
+      poseIdx = (poseIdx + 1) % 2;
+      wifeImg.src = poses[poseIdx];
+      wifeImg.style.opacity = '1';
+    }, 220);
+  }, 800);
+
+  // 4 秒後淡出並清除
+  window._betHideTimer = setTimeout(() => {
+    clearInterval(window._betPoseTimer);
+    window._betPoseTimer = null;
+    overlay.classList.remove('show');
+    wifeImg.src = 'blackview.png';
+    wifeImg.style.opacity = '1';
+  }, 4000);
 }
 
 // ══════════════════════════════════════
