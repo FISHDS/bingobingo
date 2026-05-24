@@ -217,6 +217,19 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 /* ══ Bingo section ══ */
 #bingo-section{border-top:2px solid #312e81}
 #bottom-split{display:flex;min-height:0}
+
+/* ══ 投注走路動畫 ══ */
+#walk-overlay{display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(0,0,0,.82);opacity:0;transition:opacity .4s;pointer-events:none}
+#walk-overlay.active{display:flex}
+#walk-overlay.visible{opacity:1}
+#walk-scene{position:relative;width:min(92vw,440px);height:min(62vw,300px);border-radius:12px;overflow:hidden;border:2px solid #4f46e5;box-shadow:0 0 50px rgba(99,102,241,.6)}
+#walk-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+#walk-sprite-container{position:absolute;bottom:0;width:22%;overflow:hidden}
+#walk-sprite-img{display:block;width:400%;height:auto;image-rendering:pixelated}
+#walk-back-img{position:absolute;bottom:0;right:30%;height:62%;width:auto;object-fit:contain;image-rendering:pixelated;opacity:0;transition:opacity .3s}
+#walk-back-img.show{opacity:1}
+@keyframes walkCycle{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+@keyframes walkAcross{from{left:105%}to{left:30%}}
 </style>
 </head>
 <body>
@@ -603,6 +616,17 @@ body{height:auto !important;overflow:auto !important;display:block !important}
     <span class="mnav-icon">📊</span>走勢
   </button>
 </nav>
+
+<!-- ═══ 投注走路動畫覆蓋層 ═══ -->
+<div id="walk-overlay">
+  <div id="walk-scene">
+    <img id="walk-bg-img" src="BG.png" alt="">
+    <div id="walk-sprite-container" style="position:absolute;bottom:0;width:22%;overflow:hidden;left:105%">
+      <img id="walk-sprite-img" src="WALK.jpg" alt="">
+    </div>
+    <img id="walk-back-img" src="BACK.jpg" alt="">
+  </div>
+</div>
 
 <!-- ═══ WIN BURST ═══ -->
 <div class="win-burst hidden" id="win-burst">
@@ -1427,6 +1451,7 @@ function placeBet(type) {
   renderCredits(true);
   renderPendingBets();
   showToast(`✅ 下注成功！扣除 $${cost}`);
+  triggerWalkAnimation(); // 太太走向櫃台下注動畫
 
   // Reset selections after bet
   if (type === 'star') { clearSelectedNums(); }
@@ -1434,6 +1459,53 @@ function placeBet(type) {
   else if (type === 'super') { state.spNum = null; renderSuperGrid(); }
 
   updateBetCosts();
+}
+
+// ══════════════════════════════════════
+//  WALK ANIMATION (投注走向櫃台)
+// ══════════════════════════════════════
+function triggerWalkAnimation() {
+  const overlay    = document.getElementById('walk-overlay');
+  const spriteCont = document.getElementById('walk-sprite-container');
+  const spriteImg  = document.getElementById('walk-sprite-img');
+  const backImg    = document.getElementById('walk-back-img');
+  if (!overlay) return;
+
+  // Reset
+  spriteImg.style.animation = 'none';
+  spriteCont.style.cssText   = 'position:absolute;bottom:0;width:22%;overflow:hidden;left:105%';
+  backImg.classList.remove('show');
+  backImg.style.display = 'none';
+  spriteCont.style.display = '';
+
+  // Fade in overlay
+  overlay.classList.add('active');
+  void overlay.offsetWidth;
+  overlay.classList.add('visible');
+
+  // After fade-in (420ms): start sprite cycle + walk across
+  setTimeout(() => {
+    spriteImg.style.animation = 'walkCycle 0.44s steps(4,end) infinite';
+    spriteCont.style.animation = 'walkAcross 2.4s linear forwards';
+  }, 430);
+
+  // After walk finishes (430+2400=2830ms): hide walk sprite, show back view
+  setTimeout(() => {
+    spriteCont.style.display = 'none';
+    backImg.style.display = 'block';
+    void backImg.offsetWidth;
+    backImg.classList.add('show');
+  }, 2850);
+
+  // After back view (1000ms) → fade out overlay
+  setTimeout(() => {
+    overlay.classList.remove('visible');
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      backImg.classList.remove('show');
+      spriteCont.style.display = '';
+    }, 450);
+  }, 3850);
 }
 
 // ══════════════════════════════════════
