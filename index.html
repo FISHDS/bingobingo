@@ -2323,14 +2323,17 @@ function settleScratchCard() {
 }
 
 function resetScratch() {
+  // 未揭開時不能換下一張
+  if (sc.active && !sc.revealed) {
+    showToast('請先揭開這張刮刮樂！');
+    return;
+  }
   sc.active = false;
   sc.revealed = false;
   sc.result = null;
   if (state.credits >= SC_COST) {
-    // 點數夠 → 直接買下一張，不回商店
     buyScratchCard();
   } else {
-    // 點數不足 → 回商店顯示餘額
     updateScCredits();
     document.getElementById('scratch-game').style.display = 'none';
     document.getElementById('scratch-shop').style.display = 'flex';
