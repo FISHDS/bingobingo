@@ -60,6 +60,17 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
 .v-countdown{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;z-index:10;background:rgba(0,0,0,.55);padding:4px 14px;border-radius:20px;backdrop-filter:blur(4px)}
 #sprite-wrap{display:none}
 #sprite-char{display:none}
+
+/* ══ 太太人像結果顯示 ══ */
+#sprite-result-wrap{position:absolute;bottom:0;right:4%;z-index:15;width:90px;height:130px;overflow:hidden;pointer-events:none;opacity:0;transition:opacity .5s}
+#sprite-result-wrap.show{opacity:1}
+#sprite-result-img{position:absolute;width:270px;height:auto;left:-90px;bottom:0}
+
+/* ══ 手機底部導覽 ══ */
+#mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#0a0a2e;border-top:1px solid #312e81;height:56px;align-items:stretch}
+.mnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:#6366f1;font-size:.6rem;font-weight:700;border:none;background:none;transition:color .15s}
+.mnav-btn:active{color:#a5b4fc;background:rgba(99,102,241,.1)}
+.mnav-icon{font-size:1.3rem;line-height:1}
 #settle-banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s}
 #settle-banner.show{opacity:1}
 .settle-box{padding:.8rem 2rem;border-radius:14px;text-align:center;font-size:1.4rem;font-weight:900;box-shadow:0 0 40px currentColor}
@@ -112,12 +123,43 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
 ::-webkit-scrollbar-track{background:#0a0a1a}
 ::-webkit-scrollbar-thumb{background:#4f46e5;border-radius:2px}
 
+/* ══ 手機版響應式設計 ══ */
 @media(max-width:640px){
-  .draw-ball{width:40px;height:40px;font-size:.75rem}
-  #top-section{flex-direction:column}
-  #video-col,#scratch-col{width:100%}
-  #bottom-split{flex-direction:column}
-  .left-panel,.right-panel{width:100%}
+  /* 底部 nav 佔位 */
+  body{padding-bottom:56px}
+
+  /* 頭部縮小 */
+  header{padding:.4rem .8rem !important}
+  header h1{font-size:1rem !important}
+  header .text-2xl{font-size:1.3rem !important}
+
+  /* 頂部區域：垂直堆疊 */
+  #top-section{flex-direction:column;min-height:auto}
+
+  /* 影片欄：全寬，高度 56vw */
+  #video-col{width:100% !important;min-height:0 !important;height:56vw}
+  #video-section{position:absolute !important;inset:0;height:100% !important}
+  #live-stream{width:100%;height:100%;object-fit:contain !important}
+
+  /* 刮刮樂欄：全寬，高度自適應 */
+  #scratch-col{width:100% !important;min-height:auto !important;border-left:none !important;border-top:1px solid #1e1b4b}
+  #scratch-shop{padding:12px;gap:10px}
+  #sc-card{max-width:100%}
+
+  /* 賓果投注區：垂直堆疊 */
+  #bottom-split{flex-direction:column;min-height:auto !important;overflow:visible !important}
+  .left-panel,.right-panel{width:100% !important;overflow-y:visible !important;max-height:none !important}
+
+  /* 號碼格縮小 */
+  .num-btn{height:30px;font-size:.72rem}
+  .draw-ball{width:38px;height:38px;font-size:.72rem}
+
+  /* 太太人像小一點 */
+  #sprite-result-wrap{width:65px !important;height:100px !important;right:2% !important}
+  #sprite-result-img{width:195px !important;left:-65px !important}
+
+  /* 底部導覽列 */
+  #mobile-nav{display:flex}
 }
 
 /* ══ Layout overrides for scrollable page ══ */
@@ -236,6 +278,11 @@ body{height:auto !important;overflow:auto !important;display:block !important}
     </svg>
     <p class="text-2xl font-mono font-black neon-cyan leading-none" id="countdown-display">05:00</p>
     <p class="text-[10px] text-gray-400">封盤倒數</p>
+  </div>
+
+  <!-- 太太人像 -->
+  <div id="sprite-result-wrap">
+    <img id="sprite-result-img" src="" alt="">
   </div>
 
   <!-- 結算橫幅（替代彈窗） -->
@@ -553,6 +600,22 @@ body{height:auto !important;overflow:auto !important;display:block !important}
     <p id="hubby-err" style="color:#f87171;font-size:.8rem;margin-top:.7rem;min-height:1.2em"></p>
   </div>
 </div>
+
+<!-- ═══ 手機底部導覽 ═══ -->
+<nav id="mobile-nav">
+  <button class="mnav-btn" onclick="mnavTo('top-section')">
+    <span class="mnav-icon">🎬</span>直播
+  </button>
+  <button class="mnav-btn" onclick="mnavTo('scratch-col')">
+    <span class="mnav-icon">🎴</span>刮刮樂
+  </button>
+  <button class="mnav-btn" onclick="mnavTo('bingo-section')">
+    <span class="mnav-icon">🎱</span>投注
+  </button>
+  <button class="mnav-btn" onclick="mnavTo('history-tbody')">
+    <span class="mnav-icon">📊</span>走勢
+  </button>
+</nav>
 
 <!-- ═══ WIN BURST ═══ -->
 <div class="win-burst hidden" id="win-burst">
@@ -1846,10 +1909,8 @@ function showSettlementModal(results, period) {
     setTimeout(() => banner.classList.remove('show'), 3500);
   }
 
-  // 角色動畫
-  if (net > 1000) setSpriteState('winMega', 4000);
-  else if (net > 0) setSpriteState('victory', 3500);
-  else setSpriteState('sad', 3000);
+  // 太太人像
+  showSpriteResult(net > 0 ? 'win' : 'lose', net > 0 ? 4000 : 3000);
 
   // 大贏爆炸效果
   if (anyWin) showWinBurst(net);
@@ -1932,6 +1993,28 @@ function confirmHubbyPin() {
     document.getElementById('hubby-pin').value = '';
     document.getElementById('hubby-pin').focus();
   }
+}
+
+// ══════════════════════════════════════
+//  太太人像顯示
+// ══════════════════════════════════════
+function showSpriteResult(type, durationMs = 4000) {
+  const wrap = document.getElementById('sprite-result-wrap');
+  const img  = document.getElementById('sprite-result-img');
+  if (!wrap || !img) return;
+  img.src = type === 'win' ? 'sprite-win.png' : 'sprite-lose.png';
+  wrap.classList.add('show');
+  clearTimeout(wrap._hideTimer);
+  wrap._hideTimer = setTimeout(() => wrap.classList.remove('show'), durationMs);
+}
+
+// ══════════════════════════════════════
+//  手機底部導覽
+// ══════════════════════════════════════
+function mnavTo(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function toggleVideoSound() {
@@ -2247,9 +2330,11 @@ function settleScratchCard() {
     msgEl.textContent = `🎉 恭喜中獎！+$${r.winAmount.toLocaleString()}`;
     showToast(`🎴 刮刮樂中獎！+$${r.winAmount}`);
     showWinBurst(r.winAmount);
+    showSpriteResult('win', 4000);
   } else {
     msgEl.style.color = '#f87171';
     msgEl.textContent = '😢 未中獎，再試一次！';
+    showSpriteResult('lose', 3000);
   }
 }
 
