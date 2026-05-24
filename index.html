@@ -606,7 +606,11 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 
 <!-- ═══ WIN BURST ═══ -->
 <div class="win-burst hidden" id="win-burst">
-  <div class="win-burst-text" id="win-burst-text">🎉 BINGO!</div>
+  <!-- 太太圖在下層，文字蓋上去 -->
+  <img id="sprite-burst-img" src="sprite-win.png" alt=""
+    style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);height:52vh;max-height:440px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 24px rgba(0,0,0,.85));opacity:0;transition:opacity .5s;pointer-events:none">
+  <!-- 文字在上層 -->
+  <div class="win-burst-text" id="win-burst-text" style="position:relative;z-index:1">🎉 BINGO!</div>
 </div>
 
 <script>
@@ -1903,14 +1907,29 @@ function showSettlementModal(results, period) {
 function closeModal() {} // 保留空函數避免舊呼叫出錯
 
 function showWinBurst(amount) {
-  const burst = document.getElementById('win-burst');
-  const text = document.getElementById('win-burst-text');
+  const burst  = document.getElementById('win-burst');
+  const text   = document.getElementById('win-burst-text');
+  const sprite = document.getElementById('sprite-burst-img');
+
   burst.classList.remove('hidden');
+
+  // 文字動畫
   text.textContent = amount > 500 ? '💰 大贏！' : amount > 0 ? '🎉 中獎！' : '💥 BINGO!';
   text.style.animation = 'none';
   void text.offsetWidth;
   text.style.animation = 'burstAnim .8s cubic-bezier(.34,1.56,.64,1) forwards';
-  setTimeout(() => burst.classList.add('hidden'), 2500);
+
+  // 太太淡入（在文字下層）
+  if (sprite) {
+    sprite.style.opacity = '0';
+    void sprite.offsetWidth;
+    sprite.style.opacity = '1';
+  }
+
+  setTimeout(() => {
+    burst.classList.add('hidden');
+    if (sprite) sprite.style.opacity = '0';
+  }, 2800);
 }
 
 // ══════════════════════════════════════
@@ -1982,11 +2001,13 @@ function confirmHubbyPin() {
 // ══════════════════════════════════════
 //  太太人像顯示
 // ══════════════════════════════════════
-function showSpriteResult(type, durationMs = 4000) {
+function showSpriteResult(type, durationMs = 3500) {
+  // 中獎由 showWinBurst 統一顯示；這裡只處理未中（刮刮樂欄顯示難過太太）
+  if (type === 'win') return;
   const wrap = document.getElementById('sprite-result-wrap');
   const img  = document.getElementById('sprite-result-img');
   if (!wrap || !img) return;
-  img.src = type === 'win' ? 'sprite-win.png' : 'sprite-lose.png';
+  img.src = 'sprite-lose.png';
   wrap.classList.add('show');
   clearTimeout(wrap._hideTimer);
   wrap._hideTimer = setTimeout(() => wrap.classList.remove('show'), durationMs);
