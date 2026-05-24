@@ -2209,7 +2209,7 @@ function checkScratchComplete() {
 }
 
 function autoRevealAll() {
-  if (!sc.active) return;
+  if (!sc.active || sc.revealed) return;   // ← 已揭開就不再結算
   if (sc.ctx) sc.ctx.clearRect(0, 0, sc.canvas.width, sc.canvas.height);
   sc.revealed = true;
   settleScratchCard();
