@@ -61,10 +61,10 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
 #sprite-wrap{display:none}
 #sprite-char{display:none}
 
-/* ══ 太太人像結果顯示 ══ */
-#sprite-result-wrap{position:absolute;bottom:0;right:2%;z-index:15;width:min(38%,160px);pointer-events:none;opacity:0;transition:opacity .6s}
+/* ══ 太太人像結果顯示（刮刮樂欄覆蓋） ══ */
+#sprite-result-wrap{position:absolute;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;pointer-events:none;opacity:0;transition:opacity .6s;background:linear-gradient(to top,rgba(5,5,24,.55) 0%,transparent 55%)}
 #sprite-result-wrap.show{opacity:1}
-#sprite-result-img{width:100%;height:auto;display:block}
+#sprite-result-img{width:auto;max-width:85%;max-height:85%;object-fit:contain;filter:drop-shadow(0 4px 20px rgba(0,0,0,.9));display:block}
 
 /* ══ 手機底部導覽 ══ */
 #mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#0a0a2e;border-top:1px solid #312e81;height:56px;align-items:stretch}
@@ -154,8 +154,8 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
   .num-btn{height:30px;font-size:.72rem}
   .draw-ball{width:38px;height:38px;font-size:.72rem}
 
-  /* 太太人像手機版 */
-  #sprite-result-wrap{width:min(28%,90px) !important}
+  /* 太太人像手機版：維持全欄覆蓋，圖片縮小一點 */
+  #sprite-result-img{max-height:70% !important}
 
   /* 底部導覽列 */
   #mobile-nav{display:flex}
@@ -279,11 +279,6 @@ body{height:auto !important;overflow:auto !important;display:block !important}
     <p class="text-[10px] text-gray-400">封盤倒數</p>
   </div>
 
-  <!-- 太太人像 -->
-  <div id="sprite-result-wrap">
-    <img id="sprite-result-img" src="" alt="" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,.7))">
-  </div>
-
   <!-- 結算橫幅（替代彈窗） -->
   <div id="settle-banner">
     <div class="settle-box" id="settle-box-inner"></div>
@@ -292,7 +287,7 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 </div><!-- /#video-col -->
 
 <!-- ═══ SCRATCH COL ═══ -->
-<div id="scratch-col">
+<div id="scratch-col" style="position:relative">
   <!-- 商店畫面 -->
   <div id="scratch-shop">
     <div style="text-align:center">
@@ -350,6 +345,10 @@ body{height:auto !important;overflow:auto !important;display:block !important}
       <button onclick="resetScratch()" style="flex:1;padding:.5rem;background:#374151;color:#d1d5db;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">🎴 再買一張</button>
     </div>
     <div id="sc-result-msg" style="min-height:28px;text-align:center;font-weight:900;font-size:1rem"></div>
+  </div>
+  <!-- 太太人像覆蓋層 -->
+  <div id="sprite-result-wrap">
+    <img id="sprite-result-img" src="" alt="">
   </div>
 </div><!-- /#scratch-col -->
 </div><!-- /#top-section -->
