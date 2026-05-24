@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎱 賓果賓果 虛擬投注系統</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.neon-purple{color:#c084fc;text-shadow:0 0 8px #c084fc,0 0 20px #c084fc,0 0 40px #8b5cf6}
+.neon-cyan{color:#22d3ee;text-shadow:0 0 8px #22d3ee,0 0 20px #22d3ee,0 0 40px #06b6d4}
+.neon-gold{color:#fbbf24;text-shadow:0 0 8px #fbbf24,0 0 20px #fbbf24,0 0 40px #f59e0b}
+.neon-green{color:#4ade80;text-shadow:0 0 8px #4ade80,0 0 20px #4ade80}
+.neon-red{color:#f87171;text-shadow:0 0 8px #f87171,0 0 20px #f87171}
+
+/* Draw balls */
+.draw-ball{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.45) 0%,transparent 60%),linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);box-shadow:0 0 14px rgba(99,102,241,.75),0 4px 10px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.3);opacity:0;transform:scale(0)}
+.draw-ball.show{animation:dropIn .55s cubic-bezier(.34,1.56,.64,1) forwards}
+.draw-ball.super-ball{background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.45) 0%,transparent 60%),linear-gradient(135deg,#f59e0b 0%,#ef4444 100%);box-shadow:0 0 18px rgba(245,158,11,.85),0 4px 10px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.3)}
+.draw-ball.empty-ball{background:#0f0f35;border:1px dashed #312e81;opacity:1;transform:scale(1)}
+@keyframes dropIn{0%{transform:scale(0) translateY(-25px);opacity:0}65%{transform:scale(1.18) translateY(4px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+
+/* Number picker */
+.num-btn{width:33px;height:29px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;cursor:pointer;background:#1e1b4b;border:1px solid #312e81;color:#818cf8;transition:all .12s;user-select:none;-webkit-user-select:none}
+.num-btn:hover:not(.disabled-btn){background:#2d2a72;border-color:#6366f1;transform:scale(1.1)}
+.num-btn.selected{background:#f59e0b;border-color:#fbbf24;color:#1c1917;box-shadow:0 0 8px #f59e0b90}
+.num-btn.drawn{background:#059669;border-color:#10b981;color:#fff}
+.num-btn.matched{background:#dc2626;border-color:#ef4444;color:#fff;animation:hitFlash .35s ease 4}
+.num-btn.disabled-btn{opacity:.45;cursor:not-allowed}
+@keyframes hitFlash{0%,100%{transform:scale(1)}50%{transform:scale(1.35);box-shadow:0 0 16px #ef4444}}
+
+/* Tabs */
+.tab{cursor:pointer;padding:.45rem .9rem;border-radius:6px;font-weight:600;font-size:.82rem;transition:all .18s;color:#818cf8}
+.tab.active{background:#4f46e5;color:#fff;box-shadow:0 0 14px rgba(79,70,229,.5)}
+.tab:not(.active):hover{background:#1e1b4b}
+
+/* Star selector */
+.star-btn{cursor:pointer;min-width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;background:#1e1b4b;border:2px solid #312e81;color:#818cf8;transition:all .15s}
+.star-btn.active{background:#7c3aed;border-color:#8b5cf6;color:#fff;box-shadow:0 0 12px rgba(124,58,237,.6)}
+
+/* Multi selector buttons */
+.multi-btn{cursor:pointer;width:38px;height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;background:#1e1b4b;border:1px solid #312e81;color:#818cf8;transition:all .12s}
+.multi-btn.active{background:#4f46e5;border-color:#6366f1;color:#fff}
+
+/* Choice buttons (big/small/odd/even) */
+.choice-btn{cursor:pointer;padding:.65rem 1.3rem;border-radius:8px;font-weight:800;font-size:1.05rem;border:2px solid;transition:all .18s;user-select:none}
+.choice-btn:hover{filter:brightness(1.2);transform:scale(1.04)}
+.choice-btn.ch-active{box-shadow:0 0 18px currentColor}
+
+/* Ring countdown */
+.ring-svg{transform:rotate(-90deg)}
+.ring-bg{stroke:#1e1b4b;stroke-width:4;fill:none}
+.ring-fg{stroke:#6366f1;stroke-width:4;fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+
+/* Ticker */
+.ticker-wrap{overflow:hidden;position:relative}
+.ticker-inner{display:inline-flex;gap:.5rem;animation:scrollLeft 28s linear infinite;white-space:nowrap}
+@keyframes scrollLeft{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* Section label */
+.s-lbl{font-size:.65rem;font-weight:700;letter-spacing:.15em;color:#6366f1;text-transform:uppercase;margin-bottom:.35rem}
+
+/* Bet cards */
+.bet-card{background:linear-gradient(135deg,rgba(30,27,75,.35),rgba(30,41,59,.4));border:1px solid #3730a3;border-radius:8px;padding:.7rem}
+.bet-win{border-color:#10b981 !important;background:linear-gradient(135deg,rgba(6,78,59,.25),rgba(6,95,70,.2)) !important}
+.bet-loss{border-color:#dc2626 !important;background:linear-gradient(135deg,rgba(127,29,29,.25),rgba(153,27,27,.2)) !important}
+
+/* Status dot */
+.s-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.s-ok{background:#10b981;box-shadow:0 0 6px #10b981;animation:sPulse 2s ease-in-out infinite}
+.s-err{background:#ef4444}
+.s-load{background:#f59e0b;animation:sPulse .5s ease-in-out infinite}
+.s-idle{background:#6b7280}
+@keyframes sPulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* Settlement modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-box{background:linear-gradient(135deg,#0f0a2e,#0f172a);border:1px solid #4f46e5;border-radius:16px;max-width:500px;width:94%;max-height:85vh;overflow-y:auto;box-shadow:0 0 40px rgba(79,70,229,.4)}
+
+/* Credits change animation */
+@keyframes credUp{0%{transform:translateY(0);color:#fbbf24}50%{transform:translateY(-8px);color:#4ade80}100%{transform:translateY(0);color:#fbbf24}}
+@keyframes credDown{0%{transform:translateY(0);color:#fbbf24}50%{transform:translateY(8px);color:#f87171}100%{transform:translateY(0);color:#fbbf24}}
+.cred-up{animation:credUp .6s ease}
+.cred-down{animation:credDown .6s ease}
+
+/* Flash new draw board */
+@keyframes boardFlash{0%,100%{border-color:#3730a3}50%{border-color:#6366f1;box-shadow:0 0 30px rgba(99,102,241,.45)}}
+.board-flash{animation:boardFlash 1.2s ease 3}
+
+/* Win burst overlay */
+.win-burst{position:fixed;inset:0;pointer-events:none;z-index:999;display:flex;align-items:center;justify-content:center}
+.win-burst-text{font-size:4rem;font-weight:900;color:#fbbf24;text-shadow:0 0 30px #fbbf24;animation:burstAnim .8s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0}
+@keyframes burstAnim{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2);opacity:1}80%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
+
+/* Payout table */
+.pay-row{display:flex;justify-content:space-between;padding:.18rem 0;border-bottom:1px solid #1e1b4b}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#0a0a1a}
+::-webkit-scrollbar-thumb{background:#4f46e5;border-radius:2px}
+
+@media(max-width:640px){
+  .draw-ball{width:40px;height:40px;font-size:.75rem}
+  .num-btn{width:28px;height:25px;font-size:.6rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="bg-[#0a0a2e] border-b border-indigo-900 px-4 py-2.5 flex items-center justify-between sticky top-0 z-50 shadow-xl">
+  <div class="flex items-center gap-2.5">
+    <span class="text-3xl">🎱</span>
+    <div>
+      <h1 class="text-xl font-black leading-tight neon-purple">賓果賓果</h1>
+      <p class="text-[10px] text-indigo-400 tracking-widest">BINGO BINGO 虛擬投注</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="text-right">
+      <p class="text-[10px] text-gray-500 uppercase tracking-wider">虛擬點數</p>
+      <p class="text-2xl font-black neon-gold leading-tight" id="credits-display">$1,000</p>
+    </div>
+    <div class="flex flex-col items-end gap-1">
+      <div class="flex items-center gap-1.5">
+        <div class="s-dot s-idle" id="status-dot"></div>
+        <span class="text-[10px] text-gray-400" id="status-text">初始化...</span>
+      </div>
+      <p class="text-[10px] text-gray-500" id="last-fetch-time"></p>
+    </div>
+    <button onclick="resetGame()" title="重置遊戲" class="text-gray-600 hover:text-red-400 text-sm transition-colors">⚙</button>
+  </div>
+</header>
+
+<!-- ═══ PERIOD BAR ═══ -->
+<div class="bg-[#080820] border-b border-indigo-900 px-4 py-2 flex items-center justify-between gap-4">
+  <div>
+    <p class="s-lbl mb-0.5">當期期號</p>
+    <p class="text-base font-black text-indigo-300 leading-tight" id="period-display">--</p>
+  </div>
+  <div class="flex items-center gap-3 flex-1 justify-center">
+    <div class="text-center">
+      <p class="text-[10px] text-gray-500">封盤倒數</p>
+      <p class="text-2xl font-mono font-black neon-cyan leading-tight" id="countdown-display">05:00</p>
+    </div>
+    <svg width="48" height="48" viewBox="0 0 48 48" class="ring-svg flex-shrink-0">
+      <circle cx="24" cy="24" r="19" class="ring-bg"/>
+      <circle cx="24" cy="24" r="19" class="ring-fg" id="ring-fg" stroke-dasharray="119.38" stroke-dashoffset="0"/>
+    </svg>
+  </div>
+  <div class="text-right">
+    <p class="s-lbl mb-0.5">開獎狀態</p>
+    <p class="font-bold text-sm leading-tight" id="draw-status-text">等待開獎</p>
+  </div>
+</div>
+
+<!-- ═══ TICKER ═══ -->
+<div class="bg-[#06061a] border-b border-indigo-950 px-0 py-1.5">
+  <div class="ticker-wrap">
+    <div class="ticker-inner text-xs" id="ticker-inner">
+      <span class="text-indigo-500 font-bold px-4">🎲 最新開獎走勢</span>
+      <span class="text-gray-500" id="ticker-a">載入中...</span>
+      <span class="text-indigo-500 font-bold px-4">🎲 最新開獎走勢</span>
+      <span class="text-gray-500" id="ticker-b">載入中...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="flex flex-col lg:flex-row gap-3 p-3 max-w-7xl mx-auto">
+
+  <!-- ╔══ LEFT: BET PANEL ══╗ -->
+  <div class="lg:w-[52%] flex flex-col gap-3">
+
+    <!-- Tabs -->
+    <div class="flex gap-1.5 bg-[#0a0a2e] p-1.5 rounded-xl border border-indigo-900">
+      <div class="tab active flex-1 text-center" onclick="switchTab('star')" id="tab-star">⭐ 星星投注</div>
+      <div class="tab flex-1 text-center" onclick="switchTab('bigsmall')" id="tab-bigsmall">📊 大小單雙</div>
+      <div class="tab flex-1 text-center" onclick="switchTab('super')" id="tab-super">🌟 超級獎號</div>
+    </div>
+
+    <!-- ── STAR BET PANEL ── -->
+    <div id="panel-star">
+      <!-- Star selector -->
+      <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900 mb-3">
+        <p class="s-lbl">選擇星數 <span class="text-gray-500 normal-case font-normal text-[10px]">（需選 N 個號碼，最高賠率更豐厚）</span></p>
+        <div class="flex flex-wrap gap-1.5" id="star-selector"></div>
+      </div>
+      <!-- Number grid -->
+      <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900 mb-3">
+        <div class="flex justify-between items-center mb-2">
+          <p class="s-lbl mb-0">已選 <span class="text-yellow-400" id="sel-count">0</span> / <span class="text-indigo-300" id="need-count">5</span> 個號碼</p>
+          <button onclick="clearSelectedNums()" class="text-[10px] text-red-400 hover:text-red-300 transition-colors">清除選號</button>
+        </div>
+        <div class="grid gap-1" style="grid-template-columns:repeat(10,1fr)" id="number-grid"></div>
+      </div>
+      <!-- Bet options -->
+      <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <p class="s-lbl">投注柱數</p>
+            <div class="flex gap-1" id="cols-selector-star"></div>
+          </div>
+          <div>
+            <p class="s-lbl">連續期數</p>
+            <div class="flex gap-1" id="periods-selector-star"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-[10px] text-gray-500">總投注金額</p>
+            <p class="text-xl font-black text-yellow-400" id="star-cost">$25</p>
+          </div>
+          <button onclick="placeBet('star')" id="btn-star" class="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/30 text-sm">
+            確認下注 →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BIG/SMALL/ODD/EVEN PANEL ── -->
+    <div id="panel-bigsmall" class="hidden">
+      <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900 mb-3">
+        <p class="s-lbl">大 / 小 <span class="text-gray-500 normal-case font-normal text-[10px]">（20球總和 ≥ 810 為大，＜ 810 為小）</span></p>
+        <div class="flex gap-3 mb-4">
+          <div class="choice-btn flex-1 text-center border-blue-500 text-blue-300" style="color:#60a5fa;border-color:#3b82f6" onclick="chooseBigSmall('big')" id="btn-big">大 BIG</div>
+          <div class="choice-btn flex-1 text-center border-orange-500 text-orange-300" style="color:#fb923c;border-color:#f97316" onclick="chooseBigSmall('small')" id="btn-small">小 SMALL</div>
+        </div>
+        <p class="s-lbl">單 / 雙 <span class="text-gray-500 normal-case font-normal text-[10px]">（20球總和奇數為單，偶數為雙）</span></p>
+        <div class="flex gap-3">
+          <div class="choice-btn flex-1 text-center border-pink-500 text-pink-300" style="color:#f472b6;border-color:#ec4899" onclick="chooseOddEven('odd')" id="btn-odd">單 ODD</div>
+          <div class="choice-btn flex-1 text-center border-teal-500 text-teal-300" style="color:#2dd4bf;border-color:#14b8a6" onclick="chooseOddEven('even')" id="btn-even">雙 EVEN</div>
+        </div>
+      </div>
+      <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <p class="s-lbl">投注金額（每注）</p>
+            <div class="flex flex-wrap gap-1" id="amt-selector-bs"></div>
+          </div>
+          <div>
+            <p class="s-lbl">連續期數</p>
+            <div class="flex gap-1" id="periods-selector-bs"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-[10px] text-gray-500">總投注金額</p>
+            <p class="text-xl font-black text-yellow-400" id="bs-cost">$25</p>
+          </div>
+          <button onclick="placeBet('bigsmall')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-lg transition-all text-sm">確認下注 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SUPER PRIZE PANEL ── -->
+    <div id="panel-super" class="hidden">
+      <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900 mb-3">
+        <p class="s-lbl">超級獎號 <span class="text-gray-500 normal-case font-normal text-[10px]">（猜第20球號碼，中獎賠 4 倍）</span></p>
+        <div class="grid gap-1 mt-2" style="grid-template-columns:repeat(10,1fr)" id="super-grid"></div>
+        <p class="text-xs text-gray-500 mt-2">已選：<span class="text-yellow-400 font-bold" id="super-sel">未選擇</span></p>
+      </div>
+      <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <p class="s-lbl">投注金額（每注）</p>
+            <div class="flex flex-wrap gap-1" id="amt-selector-sp"></div>
+          </div>
+          <div>
+            <p class="s-lbl">連續期數</p>
+            <div class="flex gap-1" id="periods-selector-sp"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-[10px] text-gray-500">總投注金額</p>
+            <p class="text-xl font-black text-yellow-400" id="sp-cost">$25</p>
+          </div>
+          <button onclick="placeBet('super')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-lg transition-all text-sm">確認下注 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PENDING BETS ── -->
+    <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
+      <div class="flex items-center justify-between mb-2">
+        <p class="s-lbl mb-0">待結算投注 <span class="text-gray-500 text-[10px] normal-case font-normal">（共 <span id="pending-count">0</span> 筆）</span></p>
+        <button onclick="clearSettledBets()" class="text-[10px] text-gray-600 hover:text-gray-400">清除已結算</button>
+      </div>
+      <div id="pending-list" class="space-y-1.5 max-h-40 overflow-y-auto">
+        <p class="text-gray-600 text-xs text-center py-3">尚無投注，請先選號下注</p>
+      </div>
+    </div>
+
+    <!-- ── PAYOUT TABLE ── -->
+    <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
+      <p class="s-lbl">賠率一覽</p>
+      <div id="payout-ref" class="text-[10px] space-y-0.5"></div>
+    </div>
+  </div>
+
+  <!-- ╔══ RIGHT: DRAW BOARD ══╗ -->
+  <div class="lg:w-[48%] flex flex-col gap-3">
+
+    <!-- Main draw display -->
+    <div class="bg-[#0a0a2e] rounded-xl p-4 border border-indigo-900" id="draw-board">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <p class="s-lbl mb-0.5">當期開獎號碼</p>
+          <p class="text-sm font-black text-indigo-300" id="draw-period-label">期號：--</p>
+          <p class="text-[10px] text-gray-500" id="draw-time-label">--</p>
+        </div>
+        <div class="text-right">
+          <button onclick="fetchLatestDraw()" class="text-[10px] text-indigo-400 hover:text-indigo-200 transition-colors bg-indigo-900/30 px-2 py-1 rounded">🔄 重新抓取</button>
+          <div class="mt-1">
+            <button onclick="testDraw()" class="text-[10px] text-gray-600 hover:text-gray-400 transition-colors">🎲 測試開獎</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 20 balls grid (5 columns x 4 rows) -->
+      <div class="grid grid-cols-5 gap-2 mb-4" id="draw-balls-grid">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Stats row -->
+      <div class="grid grid-cols-3 gap-2">
+        <div class="bg-[#0f0f35] rounded-lg p-2.5 text-center border border-indigo-950">
+          <p class="s-lbl mb-0.5">總和</p>
+          <p class="text-2xl font-black text-white leading-tight" id="stat-sum">--</p>
+        </div>
+        <div class="bg-[#0f0f35] rounded-lg p-2.5 text-center border border-indigo-950">
+          <p class="s-lbl mb-0.5">大小</p>
+          <p class="text-2xl font-black leading-tight" id="stat-bigsmall">--</p>
+        </div>
+        <div class="bg-[#0f0f35] rounded-lg p-2.5 text-center border border-indigo-950">
+          <p class="s-lbl mb-0.5">單雙</p>
+          <p class="text-2xl font-black leading-tight" id="stat-oddeven">--</p>
+        </div>
+      </div>
+
+      <!-- Super number -->
+      <div class="mt-2 bg-[#0f0f35] rounded-lg p-2.5 border border-yellow-900/50 flex items-center justify-between">
+        <div>
+          <p class="s-lbl text-yellow-700 mb-0.5">超級獎號（第20球）</p>
+          <p class="text-[10px] text-gray-600">賠率 4 倍</p>
+        </div>
+        <div class="draw-ball super-ball show text-lg" style="width:56px;height:56px;opacity:1;transform:scale(1)" id="super-num-display">--</div>
+      </div>
+    </div>
+
+    <!-- History table -->
+    <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
+      <p class="s-lbl">近10期走勢</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-[10px]">
+          <thead>
+            <tr class="text-indigo-500 border-b border-indigo-900">
+              <th class="text-left pb-1.5 font-bold">期號</th>
+              <th class="pb-1.5 font-bold">開出號碼</th>
+              <th class="pb-1.5 font-bold">總和</th>
+              <th class="pb-1.5 font-bold">大小</th>
+              <th class="pb-1.5 font-bold">單雙</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="5" class="text-center text-gray-600 py-4">尚無歷史記錄</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bet history -->
+    <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
+      <p class="s-lbl">投注歷史 <span class="text-gray-500 normal-case font-normal text-[10px]">（最近20筆）</span></p>
+      <div id="bet-history-list" class="space-y-1 max-h-48 overflow-y-auto">
+        <p class="text-gray-600 text-xs text-center py-3">尚無投注歷史</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTLEMENT MODAL ═══ -->
+<div class="modal-bg hidden" id="modal-overlay">
+  <div class="modal-box p-5" id="modal-box">
+    <div class="text-center mb-4">
+      <p class="text-xs text-indigo-400 tracking-widest uppercase">期號結算</p>
+      <h2 class="text-2xl font-black mt-1" id="modal-period-label">--</h2>
+    </div>
+    <div id="modal-results" class="space-y-2 mb-4"></div>
+    <div class="border-t border-indigo-900 pt-3 mb-4">
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-400">本期淨損益</span>
+        <span class="text-2xl font-black" id="modal-net">--</span>
+      </div>
+      <div class="flex justify-between items-center mt-1">
+        <span class="text-sm text-gray-400">剩餘點數</span>
+        <span class="text-xl font-bold text-yellow-400" id="modal-credits">--</span>
+      </div>
+    </div>
+    <button onclick="closeModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-all">
+      收下結果，繼續投注 ✓
+    </button>
+  </div>
+</div>
+
+<!-- ═══ WIN BURST ═══ -->
+<div class="win-burst hidden" id="win-burst">
+  <div class="win-burst-text" id="win-burst-text">🎉 BINGO!</div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  CONSTANTS & CONFIG
+// ══════════════════════════════════════
+const INITIAL_CREDITS = 1000;
+const BET_COST = 25;
+// 大/小/單/雙：41~80號≥13個→大，01~40號≥13個→小，同理單雙
+const PERIOD_SEC = 300;        // 5 分鐘一期（秒）
+const DRAW_OFFSET_SEC = 65;    // 開獎後延遲 65 秒再抓（給台彩更新時間）
+const RETRY_INTERVAL = 20000;  // 抓失敗後每 20 秒重試
+const MAX_RETRY = 4;           // 最多重試 4 次
+
+const CORS_PROXIES = [
+  '',                                          // 直接打（裝 CORS 擴充後有效）
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.io/?',
+  'https://api.codetabs.com/v1/proxy?quest=',
+  'https://thingproxy.freeboard.io/fetch/'
+];
+
+// 本地代理位址（跑 proxy.py 後自動啟用）
+const LOCAL_PROXY = 'http://localhost:8765/latest';
+
+/** 台彩官方最新賓果賓果 API（CORS 開放，瀏覽器可直連） */
+function getTaiwanLotteryApiUrl() {
+  return 'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/LatestBingoResult';
+}
+
+// 台彩可能的 API 端點（由上到下依優先順序嘗試）
+const LOTTERY_APIS = [
+  // ★ 優先：本地代理（跑 proxy.py 時 100% 成功）
+  { url: LOCAL_PROXY, type: 'local' },
+  // ★ 台彩官方 BingoResult API（Access-Control-Allow-Origin: * 開放，瀏覽器可直連）
+  { url: '__TW_LOTTERY_API__',                                       type: 'tw_api' },
+  // 台彩主頁（解析 HTML）
+  { url: 'https://www.taiwanlottery.com/lotto/result/bingo_bingo/',  type: 'html' },
+  // 備用民間直播站
+  { url: 'https://www.lotto.mydwpc.com/%E8%B3%93%E6%9E%9Cbingo%E7%9B%B4%E6%92%AD/', type: 'html' },
+];
+
+// 官方固定獎金倍數 PAYOUT[星數][猜中數] = 倍數（× $25）
+const PAYOUT = {
+  1:  {1: 2},
+  2:  {2: 3, 1: 1},
+  3:  {3: 20, 2: 2},
+  4:  {4: 40, 3: 4, 2: 1},
+  5:  {5: 300, 4: 20, 3: 2},
+  6:  {6: 1000, 5: 40, 4: 8, 3: 1},
+  7:  {7: 3200, 6: 120, 5: 12, 4: 2, 3: 1},
+  8:  {8: 20000, 7: 800, 6: 40, 5: 8, 4: 1, 0: 1},
+  9:  {9: 40000, 8: 4000, 7: 120, 6: 20, 5: 4, 4: 1, 0: 1},
+  10: {10: 200000, 9: 10000, 8: 1000, 7: 100, 6: 10, 5: 1, 0: 1}
+};
+
+const AMOUNT_OPTIONS = [25, 50, 100, 200, 500];
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let state = {
+  credits: INITIAL_CREDITS,
+  lastSettledPeriod: null,
+  pendingBets: [],
+  betHistory: [],
+  drawHistory: [],
+  currentDraw: null,
+  // UI
+  activeTab: 'star',
+  selectedStars: 5,
+  selectedNums: [],
+  starCols: 1,
+  starPeriods: 1,
+  bsBigChoice: null,
+  bsOddChoice: null,
+  bsAmt: 25,
+  bsPeriods: 1,
+  spNum: null,
+  spAmt: 25,
+  spPeriods: 1,
+  // Fetch
+  fetchStatus: 'idle',
+  lastFetchTime: null,
+  proxyIdx: 0,
+  scheduleTimer: null,
+  retryTimer: null,
+  retryCount: 0,
+  countdownTimer: null,
+  isAnimating: false
+};
+
+// ══════════════════════════════════════
+//  LOCAL STORAGE
+// ══════════════════════════════════════
+function saveState() {
+  try {
+    localStorage.setItem('bb_v2', JSON.stringify({
+      credits: state.credits,
+      lastSettledPeriod: state.lastSettledPeriod,
+      pendingBets: state.pendingBets,
+      betHistory: state.betHistory.slice(-50),
+      drawHistory: state.drawHistory.slice(-10),
+      currentDraw: state.currentDraw
+    }));
+  } catch(e) { console.warn('Save failed', e); }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('bb_v2');
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    state.credits = typeof saved.credits === 'number' ? saved.credits : INITIAL_CREDITS;
+    state.lastSettledPeriod = saved.lastSettledPeriod || null;
+    state.pendingBets = saved.pendingBets || [];
+    state.betHistory = saved.betHistory || [];
+    state.drawHistory = saved.drawHistory || [];
+    state.currentDraw = saved.currentDraw || null;
+  } catch(e) { console.warn('Load failed', e); }
+}
+
+function resetGame() {
+  if (!confirm('確定要重置遊戲嗎？所有點數與記錄將清除！')) return;
+  localStorage.removeItem('bb_v2');
+  state.credits = INITIAL_CREDITS;
+  state.lastSettledPeriod = null;
+  state.pendingBets = [];
+  state.betHistory = [];
+  state.drawHistory = [];
+  state.currentDraw = null;
+  saveState();
+  renderAll();
+  showToast('遊戲已重置，點數恢復 $1,000');
+}
+
+// ══════════════════════════════════════
+//  FETCH & PARSE
+// ══════════════════════════════════════
+async function fetchWithProxy(targetUrl, proxyOffset = 0) {
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
+    const pIdx = (state.proxyIdx + proxyOffset + i) % CORS_PROXIES.length;
+    const proxy = CORS_PROXIES[pIdx];
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 9000);
+      const res = await fetch(proxy + encodeURIComponent(targetUrl), { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        state.proxyIdx = pIdx;
+        return await res.text();
+      }
+    } catch(e) {
+      console.warn(`Proxy ${proxy} failed:`, e.message);
+    }
+  }
+  throw new Error('All proxies failed');
+}
+
+function tryParseJSON(str) {
+  try { return JSON.parse(str); } catch(e) { return null; }
+}
+
+function extractNumbersFromData(data) {
+  // Recursively search for an array of 20 numbers 1-80
+  if (!data || typeof data !== 'object') return null;
+  if (Array.isArray(data)) {
+    const nums = data.filter(n => typeof n === 'number' && n >= 1 && n <= 80);
+    const unique = [...new Set(nums)];
+    if (unique.length === 20) return unique;
+    // Try nested
+    for (const item of data) {
+      const r = extractNumbersFromData(item);
+      if (r) return r;
+    }
+    return null;
+  }
+  // Object: look for common key names
+  const numKeys = ['balls','numbers','drawNumbers','ballNumbers','numList','drawBalls','no','nums'];
+  for (const k of numKeys) {
+    if (Array.isArray(data[k])) {
+      const r = extractNumbersFromData(data[k]);
+      if (r) return r;
+    }
+  }
+  // Check values recursively
+  for (const v of Object.values(data)) {
+    if (v && typeof v === 'object') {
+      const r = extractNumbersFromData(v);
+      if (r) return r;
+    }
+  }
+  return null;
+}
+
+function extractPeriodFromData(data, html = '') {
+  // Try common keys
+  if (data && typeof data === 'object') {
+    const periodKeys = ['issueNo','period','issue','drawNo','lotteryNo','periodNo','no','gameNo'];
+    for (const k of periodKeys) {
+      if (data[k] && String(data[k]).length >= 6) return String(data[k]);
+    }
+    // Recurse
+    for (const v of Object.values(data)) {
+      if (v && typeof v === 'object') {
+        const r = extractPeriodFromData(v, '');
+        if (r) return r;
+      }
+    }
+  }
+  // Fallback: find period-looking number in HTML
+  const m = html.match(/期號[^\d]*(\d{8,})/);
+  if (m) return m[1];
+  const m2 = html.match(/第\s*(\d{8,})\s*期/);
+  if (m2) return m2[1];
+  return null;
+}
+
+/**
+ * 解析台彩 LatestBingoResult API 回應
+ * 結構：content.lotteryBingoLatestPost
+ */
+function parseTaiwanBingoApi(json) {
+  try {
+    const post = json?.content?.lotteryBingoLatestPost;
+    if (!post) return null;
+
+    // openShowOrder: 開出順序陣列（字串數字，如 "13","55",...）
+    const raw = post.openShowOrder ?? post.bigShowOrder;
+    if (!Array.isArray(raw)) return null;
+    const nums = raw.map(Number).filter(n => n >= 1 && n <= 80);
+    if (nums.length !== 20) return null;
+
+    const prize = post.prizeNum ?? {};
+    return {
+      numbers: nums,
+      period: String(post.drawTerm ?? ''),
+      time: post.dDate ?? '',
+      bigSmall: prize.highLow ?? '',   // 大/小
+      oddEven: prize.oddEven ?? '',    // 單/雙
+      superNum: prize.bullEye ? Number(prize.bullEye) : null,
+      source: 'tw_official_api'
+    };
+  } catch(e) {
+    console.warn('parseTaiwanBingoApi error:', e.message);
+    return null;
+  }
+}
+
+// 解析純 JSON API 回應（台彩 RESTful API 格式）
+function parseJsonResponse(text, sourceUrl) {
+  const data = tryParseJSON(text);
+  if (!data) return null;
+
+  // 常見台彩 API 格式嘗試
+  const candidates = [
+    data,
+    data.data, data.result, data.content,
+    data.body, data.payload, data.lotto,
+    Array.isArray(data) ? data[0] : null
+  ].filter(Boolean);
+
+  for (const obj of candidates) {
+    // 找號碼陣列
+    const nums = extractNumbersFromData(obj);
+    if (!nums) continue;
+
+    // 找期號
+    const period = extractPeriodFromData(obj, '');
+
+    // 找開獎時間
+    const timeKeys = ['drawTime','draw_time','openTime','open_time','date','drawDate'];
+    let drawTime = null;
+    for (const k of timeKeys) {
+      if (obj[k]) { drawTime = String(obj[k]); break; }
+    }
+
+    return { numbers: nums, period, time: drawTime, source: 'json_api:' + sourceUrl.slice(-30) };
+  }
+  return null;
+}
+
+function parseTaiwanLotteryPage(html) {
+  // Strategy 1: __NEXT_DATA__
+  const m1 = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+  if (m1) {
+    const data = tryParseJSON(m1[1]);
+    if (data) {
+      const nums = extractNumbersFromData(data);
+      if (nums) {
+        return { numbers: nums, period: extractPeriodFromData(data, html), source: 'next_data' };
+      }
+    }
+  }
+
+  // Strategy 2: Inline JSON variables
+  const jsonVarPatterns = [
+    /window\.__(?:LOTTERY|BINGO|DRAW)_?(?:DATA|RESULT|INFO)__\s*=\s*(\{[\s\S]{10,2000}?\});/,
+    /var\s+(?:lotteryData|drawData|bingoData|result)\s*=\s*(\{[\s\S]{10,2000}?\});/,
+    /"drawNumbers"\s*:\s*(\[[^\]]+\])/,
+    /"balls"\s*:\s*(\[[^\]]+\])/,
+    /"numbers"\s*:\s*(\[[^\]]+\])/
+  ];
+  for (const pat of jsonVarPatterns) {
+    const m = html.match(pat);
+    if (m) {
+      const data = tryParseJSON(m[1]);
+      if (data) {
+        const nums = Array.isArray(data) ? data.filter(n => n >= 1 && n <= 80) : extractNumbersFromData(data);
+        if (nums && nums.length === 20) {
+          return { numbers: nums, period: extractPeriodFromData(data, html), source: 'inline_json' };
+        }
+      }
+    }
+  }
+
+  // Strategy 3: HTML data attributes
+  const attrPatterns = [
+    /data-(?:ball|num|number)(?:-\d+)?="(\d{1,2})"/g,
+    /class="[^"]*ball[^"]*"[^>]*>\s*(\d{1,2})\s*</g,
+    /class="[^"]*num[^"]*"[^>]*>\s*(\d{1,2})\s*</g,
+    /class="[^"]*lottery[^"]*"[^>]*>\s*(\d{1,2})\s*</g
+  ];
+  for (const pat of attrPatterns) {
+    const matches = [...html.matchAll(pat)].map(m => parseInt(m[1]));
+    const valid = matches.filter(n => n >= 1 && n <= 80);
+    const unique = [...new Set(valid)];
+    if (unique.length >= 20) {
+      return { numbers: unique.slice(0, 20), period: extractPeriodFromData(null, html), source: 'html_attr' };
+    }
+  }
+
+  // Strategy 4: Ordered spans/tds with sequential numbers
+  const cellPattern = /<(?:td|span|div|li)[^>]*>\s*(\d{1,2})\s*<\/(?:td|span|div|li)>/g;
+  const cells = [...html.matchAll(cellPattern)].map(m => parseInt(m[1]));
+  const validCells = cells.filter(n => n >= 1 && n <= 80);
+  // Check for a run of 20 consecutive unique numbers
+  for (let i = 0; i <= validCells.length - 20; i++) {
+    const slice = validCells.slice(i, i + 20);
+    const unique = new Set(slice);
+    if (unique.size === 20) {
+      return { numbers: slice, period: extractPeriodFromData(null, html), source: 'html_cells' };
+    }
+  }
+
+  return null;
+}
+
+function parseBackupPage(html) {
+  // Backup site: look for 20 numbers displayed as the current draw
+  // Patterns specific to live broadcast sites
+  const patterns = [
+    /<span[^>]*class="[^"]*(?:ball|number|num|lotto)[^"]*"[^>]*>\s*(\d{1,2})\s*<\/span>/gi,
+    /<div[^>]*class="[^"]*(?:ball|number|num|lotto)[^"]*"[^>]*>\s*(\d{1,2})\s*<\/div>/gi,
+    /ball_num[^>]*>\s*(\d{1,2})\s*</gi,
+    /"ball_no"\s*:\s*"(\d{1,2})"/g,
+    /"no"\s*:\s*(\d{1,2})[,\}]/g
+  ];
+  for (const pat of patterns) {
+    const matches = [...html.matchAll(pat)].map(m => parseInt(m[1]));
+    const valid = matches.filter(n => n >= 1 && n <= 80);
+    const unique = [...new Set(valid)];
+    if (unique.length === 20) {
+      return { numbers: unique, period: extractPeriodFromData(null, html), source: 'backup' };
+    }
+  }
+  return parseTaiwanLotteryPage(html); // try generic as well
+}
+
+// ══════════════════════════════════════
+//  SMART SCHEDULER（開獎後延遲精準抓取）
+// ══════════════════════════════════════
+
+/** 計算距「下次開獎後 65 秒」還有幾毫秒 */
+function msUntilNextFetchWindow() {
+  const now = new Date();
+  const totalSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const secsInPeriod = totalSec % PERIOD_SEC;               // 這一期已過幾秒
+  const secsUntilDraw = PERIOD_SEC - secsInPeriod;          // 距下次整點開獎
+  const secsUntilFetch = secsUntilDraw + DRAW_OFFSET_SEC;   // 再加 65 秒緩衝
+  return secsUntilFetch * 1000;
+}
+
+/** 更新 header 倒數顯示「下次抓取」時間 */
+function updateNextFetchLabel(msLeft) {
+  const el = document.getElementById('last-fetch-time');
+  if (!el) return;
+  const sec = Math.round(msLeft / 1000);
+  const m = Math.floor(sec / 60), s = sec % 60;
+  if (msLeft > 0) {
+    el.textContent = `下次抓取：${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} 後`;
+  }
+}
+
+function scheduleNextFetch() {
+  clearTimeout(state.scheduleTimer);
+  clearTimeout(state.retryTimer);
+  state.retryCount = 0;
+
+  const ms = msUntilNextFetchWindow();
+  updateNextFetchLabel(ms);
+
+  // 每秒更新 header 倒數
+  const labelInterval = setInterval(() => {
+    const remaining = state._fetchAt - Date.now();
+    if (remaining <= 0) { clearInterval(labelInterval); return; }
+    updateNextFetchLabel(remaining);
+  }, 1000);
+
+  state._fetchAt = Date.now() + ms;
+
+  state.scheduleTimer = setTimeout(async () => {
+    clearInterval(labelInterval);
+    await doFetchWithRetry();
+    scheduleNextFetch(); // 本期抓完，排下一期
+  }, ms);
+
+  console.log(`⏰ 下次抓取排程：${(ms/1000).toFixed(0)} 秒後（${new Date(Date.now()+ms).toLocaleTimeString('zh-TW')}）`);
+}
+
+async function doFetchWithRetry() {
+  for (let attempt = 1; attempt <= MAX_RETRY; attempt++) {
+    state.retryCount = attempt;
+    await fetchLatestDraw();
+
+    // 如果成功取得新期號，就不需要重試
+    if (state.fetchStatus === 'ok') {
+      console.log(`✅ 第 ${attempt} 次抓取成功`);
+      return;
+    }
+
+    if (attempt < MAX_RETRY) {
+      console.warn(`⚠ 第 ${attempt} 次失敗，${RETRY_INTERVAL/1000} 秒後重試...`);
+      await new Promise(r => { state.retryTimer = setTimeout(r, RETRY_INTERVAL); });
+    }
+  }
+  console.warn('❌ 本期所有重試均失敗，等待下一期');
+  showToast(`⚠ 本期抓取失敗，已重試 ${MAX_RETRY} 次，等待下一期`, 4000);
+}
+
+async function fetchLatestDraw() {
+  if (state.fetchStatus === 'loading') return;
+  state.fetchStatus = 'loading';
+  updateFetchStatus();
+
+  let drawData = null;
+  let successUrl = '';
+
+  // ── 優先嘗試本地代理（不需 CORS，直接回傳 JSON）──
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 3000);
+    const res = await fetch(LOCAL_PROXY, { signal: ctrl.signal });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.numbers && json.numbers.length === 20) {
+        drawData = { numbers: json.numbers, period: json.period, source: 'local_proxy', time: new Date().toLocaleTimeString('zh-TW') };
+        successUrl = '(本地代理) localhost:8765';
+        console.log('✅ 本地代理成功！', json.period, json.numbers.slice(0,5));
+      }
+    }
+  } catch(e) { /* 代理未啟動屬正常，靜默略過 */ }
+
+  // ── 台彩官方 BingoResult API（瀏覽器直連，CORS 已開放）──
+  if (!drawData) {
+    try {
+      const apiUrl = getTaiwanLotteryApiUrl();
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(apiUrl, {
+        signal: ctrl.signal,
+        headers: {
+          'Accept': 'application/json',
+          'Referer': 'https://www.taiwanlottery.com/lotto/result/bingo_bingo/'
+        }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        drawData = parseTaiwanBingoApi(json);
+        if (drawData) {
+          successUrl = '(直連) api.taiwanlottery.com/TLCAPIWeB';
+          console.log('✅ 台彩官方 API 成功！', drawData.period, drawData.numbers.slice(0,5));
+        }
+      }
+    } catch(e) { console.warn('台彩 API 直連失敗:', e.message); }
+  }
+
+  // ── 若上述都失敗，依序嘗試遠端端點 × Proxy ──
+  if (!drawData) outer:
+  for (const api of LOTTERY_APIS) {
+    if (api.type === 'local' || api.type === 'tw_api') continue;
+    for (let pi = 0; pi < CORS_PROXIES.length; pi++) {
+      const proxy = CORS_PROXIES[pi];
+      const fullUrl = proxy
+        ? proxy + encodeURIComponent(api.url)
+        : api.url;                               // 空 proxy = 直連
+
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 8000);
+        const res = await fetch(fullUrl, { signal: ctrl.signal });
+        clearTimeout(timer);
+
+        if (!res.ok) continue;
+
+        const text = await res.text();
+
+        // JSON 端點
+        if (api.type === 'json') {
+          drawData = parseJsonResponse(text, api.url);
+        }
+        // HTML 端點
+        if (!drawData) {
+          drawData = api.url.includes('mydwpc') || api.url.includes('lotto.in')
+            ? parseBackupPage(text)
+            : parseTaiwanLotteryPage(text);
+        }
+
+        if (drawData && drawData.numbers && drawData.numbers.length === 20) {
+          successUrl = `${proxy ? '(proxy)' : '(直連)'} ${api.url.replace('https://','').slice(0,40)}`;
+          console.log(`✅ 成功：${successUrl} | source=${drawData.source}`);
+          break outer;
+        }
+      } catch(e) {
+        // 直連失敗是正常的（沒裝 CORS 擴充時），只 log proxy 失敗
+        if (proxy) console.warn(`  ✗ ${proxy.slice(0,30)} × ${api.url.slice(0,30)} → ${e.message}`);
+      }
+    }
+  }
+
+  state.lastFetchTime = new Date();
+
+  if (drawData && drawData.numbers && drawData.numbers.length === 20) {
+    state.fetchStatus = 'ok';
+    state.lastSuccessUrl = successUrl;
+    const period = drawData.period || generatePeriodId();
+    if (period !== state.lastSettledPeriod) {
+      await onNewDraw({ ...drawData, period });
+    } else {
+      state.currentDraw = { ...drawData, period };
+      renderDrawBoard();
+    }
+  } else {
+    state.fetchStatus = 'error';
+  }
+
+  updateFetchStatus();
+  saveState();
+}
+
+function generatePeriodId() {
+  const now = new Date();
+  const totalMins = now.getHours() * 60 + now.getMinutes();
+  const periodNum = Math.floor(totalMins / 5) + 1;
+  const dateStr = now.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '');
+  return `${dateStr}${String(periodNum).padStart(3, '0')}`;
+}
+
+// ══════════════════════════════════════
+//  GAME LOGIC
+// ══════════════════════════════════════
+
+/** 依官方規則計算大小單雙：41~80號≥13個→大，01~40號≥13個→小，同理單雙 */
+function computeDrawStats(nums) {
+  const sum = nums.reduce((a, b) => a + b, 0);
+  const highCount = nums.filter(n => n >= 41).length;
+  const lowCount  = nums.filter(n => n <= 40).length;
+  const oddCount  = nums.filter(n => n % 2 === 1).length;
+  const evenCount = nums.filter(n => n % 2 === 0).length;
+  return {
+    sum,
+    highCount, lowCount, oddCount, evenCount,
+    isBig:   highCount >= 13,
+    isSmall: lowCount  >= 13,
+    isOdd:   oddCount  >= 13,
+    isEven:  evenCount >= 13,
+    superNum: nums[19]
+  };
+}
+
+async function onNewDraw(drawData) {
+  state.currentDraw = drawData;
+
+  // Add to history
+  const stats = computeDrawStats(drawData.numbers);
+  const { sum, isBig, isSmall, isOdd, isEven, superNum } = stats;
+
+  const histEntry = {
+    period: drawData.period,
+    numbers: drawData.numbers,
+    sum, isBig, isSmall, isOdd, isEven, superNum,
+    time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+  };
+
+  // Avoid duplicate period in history
+  if (!state.drawHistory.find(h => h.period === drawData.period)) {
+    state.drawHistory.unshift(histEntry);
+    if (state.drawHistory.length > 10) state.drawHistory.pop();
+  }
+
+  // Animate draw
+  await animateDraw(drawData.numbers);
+
+  // Settle bets
+  const settlementResults = settleBets(drawData.numbers, drawData.period, stats);
+  state.lastSettledPeriod = drawData.period;
+
+  renderAll();
+
+  // Show settlement if there were bets
+  if (settlementResults.length > 0) {
+    showSettlementModal(settlementResults, drawData.period);
+  }
+}
+
+async function animateDraw(numbers) {
+  state.isAnimating = true;
+  const grid = document.getElementById('draw-balls-grid');
+
+  // Reset all balls to empty
+  grid.innerHTML = '';
+  for (let i = 0; i < 20; i++) {
+    const div = document.createElement('div');
+    div.className = 'draw-ball empty-ball flex items-center justify-content-center';
+    div.style.cssText = 'width:50px;height:50px;opacity:.15;transform:scale(.8)';
+    div.innerHTML = `<span style="font-size:.65rem;color:#3730a3">${String(i+1).padStart(2,'0')}</span>`;
+    grid.appendChild(div);
+  }
+
+  // Drop balls one by one with delay
+  for (let i = 0; i < 20; i++) {
+    await delay(i < 5 ? 180 : i < 10 ? 150 : 120);
+    const isLast = i === 19;
+    const ballEl = grid.children[i];
+    ballEl.className = `draw-ball${isLast ? ' super-ball' : ''} show flex items-center justify-content-center`;
+    ballEl.style.cssText = `width:50px;height:50px;animation-delay:0s`;
+    ballEl.innerHTML = `<span style="font-size:.88rem;color:#fff;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.5)">${String(numbers[i]).padStart(2,'0')}</span>`;
+  }
+
+  // Update stats
+  const { sum, isBig, isSmall, isOdd, isEven } = computeDrawStats(numbers);
+
+  document.getElementById('stat-sum').textContent = sum;
+  const bsEl = document.getElementById('stat-bigsmall');
+  bsEl.textContent = isBig ? '大' : isSmall ? '小' : '－';
+  bsEl.className = `text-2xl font-black leading-tight ${isBig ? 'neon-cyan' : isSmall ? 'neon-red' : 'text-gray-400'}`;
+  const oeEl = document.getElementById('stat-oddeven');
+  oeEl.textContent = isOdd ? '單' : isEven ? '雙' : '－';
+  oeEl.className = `text-2xl font-black leading-tight ${isOdd ? 'neon-purple' : isEven ? 'neon-green' : 'text-gray-400'}`;
+
+  const superEl = document.getElementById('super-num-display');
+  superEl.textContent = String(numbers[19]).padStart(2, '0');
+  superEl.style.animation = 'dropIn .8s cubic-bezier(.34,1.56,.64,1)';
+
+  document.getElementById('draw-board').classList.add('board-flash');
+  setTimeout(() => document.getElementById('draw-board').classList.remove('board-flash'), 4000);
+
+  // Highlight matched numbers on picker grid
+  highlightMatches(numbers);
+
+  await delay(600);
+  state.isAnimating = false;
+}
+
+function highlightMatches(drawnNums) {
+  document.querySelectorAll('.num-btn[data-num]').forEach(btn => {
+    const n = parseInt(btn.dataset.num);
+    if (drawnNums.includes(n)) {
+      if (btn.classList.contains('selected')) {
+        btn.classList.add('matched');
+      } else {
+        btn.classList.add('drawn');
+      }
+    } else {
+      btn.classList.remove('drawn', 'matched');
+    }
+  });
+}
+
+function settleBets(drawnNums, period, stats) {
+  const { isBig, isSmall, isOdd, isEven, superNum } = stats;
+  const results = [];
+  const betsForPeriod = state.pendingBets.filter(b =>
+    b.periodsLeft > 0 && b.status === 'pending'
+  );
+
+  for (const bet of betsForPeriod) {
+    let winAmount = 0;
+    let resultDesc = '';
+
+    if (bet.type === 'star') {
+      const matches = bet.numbers.filter(n => drawnNums.includes(n)).length;
+      const table = PAYOUT[bet.stars] || {};
+      const mult = table[matches] || 0;
+      winAmount = mult > 0 ? Math.round(bet.amount * mult) : 0;
+      const net = winAmount - bet.amount;
+      resultDesc = `${bet.stars}星 | 選${bet.stars}中${matches} | 賠率 ${mult > 0 ? mult + 'x' : '未中'}`;
+      results.push({ bet, matches, mult, winAmount, net, resultDesc, period });
+    } else if (bet.type === 'bigsmall') {
+      const parts = [];
+      const numSubs = (bet.bigChoice ? 1 : 0) + (bet.oddChoice ? 1 : 0);
+      const perSub = bet.amount / numSubs;
+      if (bet.bigChoice) {
+        const correct = (isBig && bet.bigChoice === 'big') || (isSmall && bet.bigChoice === 'small');
+        if (correct) winAmount += Math.round(perSub * 6);
+        parts.push(`${bet.bigChoice === 'big' ? '大' : '小'} ${correct ? '✓' : '✗'}`);
+      }
+      if (bet.oddChoice) {
+        const correct = (isOdd && bet.oddChoice === 'odd') || (isEven && bet.oddChoice === 'even');
+        if (correct) winAmount += Math.round(perSub * 6);
+        parts.push(`${bet.oddChoice === 'odd' ? '單' : '雙'} ${correct ? '✓' : '✗'}`);
+      }
+      const net = winAmount - bet.amount;
+      resultDesc = `大小單雙 | ${parts.join(' + ')}`;
+      results.push({ bet, winAmount, net, resultDesc, period });
+    } else if (bet.type === 'super') {
+      const correct = bet.number === superNum;
+      winAmount = correct ? Math.round(bet.amount * 48) : 0;
+      const net = winAmount - bet.amount;
+      resultDesc = `超級獎號 | 猜${String(bet.number).padStart(2,'0')} 開${String(superNum).padStart(2,'0')} ${correct ? '✓ 中獎' : '✗ 未中'}`;
+      results.push({ bet, winAmount, net, resultDesc, period });
+    }
+
+    // Update bet
+    bet.periodsLeft--;
+    if (bet.periodsLeft <= 0) {
+      bet.status = 'settled';
+    }
+
+    // Credit
+    const r = results[results.length - 1];
+    state.credits += r.winAmount;
+
+    // Move to history if fully settled
+    if (bet.status === 'settled') {
+      state.betHistory.unshift({
+        ...bet,
+        settledPeriod: period,
+        totalWin: (bet.totalWin || 0) + r.winAmount,
+        totalNet: (bet.totalNet || 0) + r.net
+      });
+    }
+  }
+
+  // Remove settled bets from pending
+  state.pendingBets = state.pendingBets.filter(b => b.status === 'pending');
+  if (state.betHistory.length > 50) state.betHistory = state.betHistory.slice(0, 50);
+
+  return results;
+}
+
+// ══════════════════════════════════════
+//  BETTING ACTIONS
+// ══════════════════════════════════════
+function placeBet(type) {
+  if (state.isAnimating) { showToast('開獎中，請稍後'); return; }
+  if (state.currentDraw && state.lastSettledPeriod === state.currentDraw.period) {
+    // Check if within lockout window
+  }
+
+  let cost = 0;
+  let bet = { id: Date.now(), type, status: 'pending', placedAt: new Date().toLocaleTimeString('zh-TW') };
+
+  if (type === 'star') {
+    if (state.selectedNums.length !== state.selectedStars) {
+      showToast(`請先選擇 ${state.selectedStars} 個號碼`); return;
+    }
+    cost = BET_COST * state.starCols * state.starPeriods;
+    if (state.credits < cost) { showToast('點數不足！'); return; }
+    bet = { ...bet, stars: state.selectedStars, numbers: [...state.selectedNums],
+      columns: state.starCols, periodsLeft: state.starPeriods, totalPeriods: state.starPeriods,
+      amount: BET_COST * state.starCols };
+  } else if (type === 'bigsmall') {
+    if (!state.bsBigChoice && !state.bsOddChoice) { showToast('請選擇大/小或單/雙'); return; }
+    cost = state.bsAmt * state.bsPeriods;
+    if (state.credits < cost) { showToast('點數不足！'); return; }
+    bet = { ...bet, bigChoice: state.bsBigChoice, oddChoice: state.bsOddChoice,
+      amount: state.bsAmt, periodsLeft: state.bsPeriods, totalPeriods: state.bsPeriods };
+  } else if (type === 'super') {
+    if (!state.spNum) { showToast('請選擇一個超級獎號'); return; }
+    cost = state.spAmt * state.spPeriods;
+    if (state.credits < cost) { showToast('點數不足！'); return; }
+    bet = { ...bet, number: state.spNum, amount: state.spAmt,
+      periodsLeft: state.spPeriods, totalPeriods: state.spPeriods };
+  }
+
+  state.credits -= cost;
+  state.pendingBets.push(bet);
+  saveState();
+  renderCredits(true);
+  renderPendingBets();
+  showToast(`✅ 下注成功！扣除 $${cost}`);
+
+  // Reset selections after bet
+  if (type === 'star') { clearSelectedNums(); }
+  else if (type === 'bigsmall') { state.bsBigChoice = null; state.bsOddChoice = null; renderBigSmallPanel(); }
+  else if (type === 'super') { state.spNum = null; renderSuperGrid(); }
+
+  updateBetCosts();
+}
+
+// ══════════════════════════════════════
+//  TEST DRAW
+// ══════════════════════════════════════
+async function testDraw() {
+  if (state.isAnimating) { showToast('開獎動畫進行中...'); return; }
+  const nums = generateRandomDraw();
+  const period = generatePeriodId() + '_test';
+  await onNewDraw({ numbers: nums, period, source: 'test' });
+}
+
+function generateRandomDraw() {
+  const pool = Array.from({length: 80}, (_, i) => i + 1);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, 20);
+}
+
+// ══════════════════════════════════════
+//  COUNTDOWN
+// ══════════════════════════════════════
+function updateCountdown() {
+  const now = new Date();
+  const totalSecs = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const secsInPeriod = totalSecs % PERIOD_SEC;
+  const secsLeft = PERIOD_SEC - secsInPeriod;
+
+  const mins = Math.floor(secsLeft / 60);
+  const secs = secsLeft % 60;
+  document.getElementById('countdown-display').textContent =
+    `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+
+  // Ring animation
+  const progress = secsInPeriod / PERIOD_SEC;
+  const circumference = 119.38;
+  const offset = circumference * (1 - progress);
+  const ring = document.getElementById('ring-fg');
+  if (ring) {
+    ring.style.strokeDashoffset = offset;
+    ring.style.stroke = secsLeft < 30 ? '#ef4444' : secsLeft < 60 ? '#f59e0b' : '#6366f1';
+  }
+
+  // Status text
+  const statusEl = document.getElementById('draw-status-text');
+  if (secsLeft <= 10) {
+    statusEl.textContent = '🔴 即將開獎';
+    statusEl.className = 'font-bold text-sm neon-red';
+  } else if (secsLeft <= 30) {
+    statusEl.textContent = '🟡 封盤中';
+    statusEl.className = 'font-bold text-sm neon-gold';
+  } else {
+    statusEl.textContent = '🟢 可以投注';
+    statusEl.className = 'font-bold text-sm neon-green';
+  }
+}
+
+// ══════════════════════════════════════
+//  UI RENDERING
+// ══════════════════════════════════════
+function renderAll() {
+  renderCredits();
+  renderNumberGrid();
+  renderSuperGrid();
+  renderPendingBets();
+  renderBetHistory();
+  renderDrawBoard();
+  renderHistory();
+  renderPayoutRef();
+  updateBetCosts();
+  updatePeriodDisplay();
+}
+
+function renderCredits(animate = false) {
+  const el = document.getElementById('credits-display');
+  el.textContent = `$${state.credits.toLocaleString()}`;
+  if (animate) {
+    el.classList.remove('cred-up', 'cred-down');
+    void el.offsetWidth;
+    el.classList.add('cred-up');
+  }
+}
+
+function updatePeriodDisplay() {
+  if (state.currentDraw) {
+    document.getElementById('period-display').textContent = state.currentDraw.period || '--';
+    document.getElementById('draw-period-label').textContent = `期號：${state.currentDraw.period || '--'}`;
+  }
+}
+
+function renderDrawBoard() {
+  const draw = state.currentDraw;
+  if (!draw || !draw.numbers) return;
+
+  const grid = document.getElementById('draw-balls-grid');
+  grid.innerHTML = '';
+  const nums = draw.numbers;
+  const { sum, isBig, isSmall, isOdd, isEven } = computeDrawStats(nums);
+
+  nums.forEach((n, i) => {
+    const isLast = i === 19;
+    const div = document.createElement('div');
+    div.className = `draw-ball${isLast ? ' super-ball' : ''} show flex items-center justify-content-center`;
+    div.style.cssText = `width:50px;height:50px;animation-delay:${i * 0.04}s`;
+    div.innerHTML = `<span style="font-size:.88rem;color:#fff;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.5)">${String(n).padStart(2,'0')}</span>`;
+    grid.appendChild(div);
+  });
+
+  document.getElementById('stat-sum').textContent = sum;
+  const bsEl = document.getElementById('stat-bigsmall');
+  bsEl.textContent = isBig ? '大' : isSmall ? '小' : '－';
+  bsEl.className = `text-2xl font-black leading-tight ${isBig ? 'neon-cyan' : isSmall ? 'neon-red' : 'text-gray-400'}`;
+  const oeEl = document.getElementById('stat-oddeven');
+  oeEl.textContent = isOdd ? '單' : isEven ? '雙' : '－';
+  oeEl.className = `text-2xl font-black leading-tight ${isOdd ? 'neon-purple' : isEven ? 'neon-green' : 'text-gray-400'}`;
+
+  const superEl = document.getElementById('super-num-display');
+  superEl.textContent = String(nums[19]).padStart(2, '0');
+
+  document.getElementById('draw-period-label').textContent = `期號：${draw.period || '--'}`;
+  document.getElementById('draw-time-label').textContent = draw.time || new Date().toLocaleTimeString('zh-TW');
+
+  // Highlight matches on grid
+  if (state.selectedNums.length > 0) highlightMatches(nums);
+
+  // Update ticker
+  const tickerText = `第 ${draw.period || '--'} 期 | 號碼：${nums.map(n => String(n).padStart(2,'0')).join(' ')} | 總和 ${sum} | ${isBig ? '大' : isSmall ? '小' : '－'} ${isOdd ? '單' : isEven ? '雙' : '－'}`;
+  document.getElementById('ticker-a').textContent = tickerText;
+  document.getElementById('ticker-b').textContent = tickerText;
+}
+
+function renderNumberGrid() {
+  const grid = document.getElementById('number-grid');
+  grid.innerHTML = '';
+  for (let n = 1; n <= 80; n++) {
+    const btn = document.createElement('div');
+    btn.className = 'num-btn';
+    btn.dataset.num = n;
+    btn.textContent = String(n).padStart(2, '0');
+    if (state.selectedNums.includes(n)) btn.classList.add('selected');
+    if (state.currentDraw) {
+      if (state.currentDraw.numbers.includes(n)) {
+        btn.classList.add(state.selectedNums.includes(n) ? 'matched' : 'drawn');
+      }
+    }
+    btn.addEventListener('click', () => toggleNum(n));
+    grid.appendChild(btn);
+  }
+  document.getElementById('sel-count').textContent = state.selectedNums.length;
+  document.getElementById('need-count').textContent = state.selectedStars;
+}
+
+function renderSuperGrid() {
+  const grid = document.getElementById('super-grid');
+  grid.innerHTML = '';
+  for (let n = 1; n <= 80; n++) {
+    const btn = document.createElement('div');
+    btn.className = 'num-btn';
+    btn.dataset.num = n;
+    btn.textContent = String(n).padStart(2, '0');
+    if (state.spNum === n) btn.classList.add('selected');
+    if (state.currentDraw && state.currentDraw.numbers[19] === n) btn.classList.add('drawn');
+    btn.addEventListener('click', () => { state.spNum = n; renderSuperGrid(); updateBetCosts(); document.getElementById('super-sel').textContent = String(n).padStart(2,'0'); });
+    grid.appendChild(btn);
+  }
+  document.getElementById('super-sel').textContent = state.spNum ? String(state.spNum).padStart(2,'0') : '未選擇';
+}
+
+function renderStarSelector() {
+  const container = document.getElementById('star-selector');
+  container.innerHTML = '';
+  for (let s = 1; s <= 10; s++) {
+    const btn = document.createElement('div');
+    btn.className = `star-btn${state.selectedStars === s ? ' active' : ''}`;
+    btn.textContent = `${s}★`;
+    btn.title = PAYOUT[s] ? Object.entries(PAYOUT[s]).map(([k,v]) => `中${k}賠${v}倍`).join(', ') : '';
+    btn.addEventListener('click', () => { state.selectedStars = s; state.selectedNums = []; renderStarSelector(); renderNumberGrid(); updateBetCosts(); });
+    container.appendChild(btn);
+  }
+}
+
+function renderMultiSelector(containerId, stateKey, options) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  options.forEach(v => {
+    const btn = document.createElement('div');
+    btn.className = `multi-btn${state[stateKey] === v ? ' active' : ''}`;
+    btn.textContent = v;
+    btn.addEventListener('click', () => { state[stateKey] = v; renderMultiSelector(containerId, stateKey, options); updateBetCosts(); });
+    container.appendChild(btn);
+  });
+}
+
+function renderAmtSelector(containerId, stateKey) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  AMOUNT_OPTIONS.forEach(v => {
+    const btn = document.createElement('div');
+    btn.className = `multi-btn${state[stateKey] === v ? ' active' : ''}`;
+    btn.textContent = `$${v}`;
+    btn.addEventListener('click', () => { state[stateKey] = v; renderAmtSelector(containerId, stateKey); updateBetCosts(); });
+    container.appendChild(btn);
+  });
+}
+
+function renderBigSmallPanel() {
+  ['big','small'].forEach(c => {
+    const el = document.getElementById(`btn-${c}`);
+    if (!el) return;
+    el.classList.toggle('ch-active', state.bsBigChoice === c);
+  });
+  ['odd','even'].forEach(c => {
+    const el = document.getElementById(`btn-${c}`);
+    if (!el) return;
+    el.classList.toggle('ch-active', state.bsOddChoice === c);
+  });
+}
+
+function renderPendingBets() {
+  const container = document.getElementById('pending-list');
+  const bets = state.pendingBets;
+  document.getElementById('pending-count').textContent = bets.length;
+
+  if (bets.length === 0) {
+    container.innerHTML = '<p class="text-gray-600 text-xs text-center py-3">尚無投注，請先選號下注</p>';
+    return;
+  }
+
+  container.innerHTML = bets.map(bet => {
+    let desc = '';
+    if (bet.type === 'star') {
+      desc = `${bet.stars}★ 投注 | ${bet.columns}柱 | 號碼：${bet.numbers.map(n => String(n).padStart(2,'0')).join(' ')}`;
+    } else if (bet.type === 'bigsmall') {
+      const parts = [];
+      if (bet.bigChoice) parts.push(bet.bigChoice === 'big' ? '大' : '小');
+      if (bet.oddChoice) parts.push(bet.oddChoice === 'odd' ? '單' : '雙');
+      desc = `大小單雙 | ${parts.join('+')}`;
+    } else if (bet.type === 'super') {
+      desc = `超級獎號 | 猜 ${String(bet.number).padStart(2,'0')}`;
+    }
+    return `<div class="bet-card text-xs flex justify-between items-center gap-2">
+      <div class="flex-1 min-w-0">
+        <p class="text-indigo-300 truncate">${desc}</p>
+        <p class="text-gray-500">$${bet.amount}/期 · 剩 ${bet.periodsLeft}/${bet.totalPeriods} 期</p>
+      </div>
+      <span class="text-yellow-500 font-bold flex-shrink-0">待開</span>
+    </div>`;
+  }).join('');
+}
+
+function renderBetHistory() {
+  const container = document.getElementById('bet-history-list');
+  const hist = state.betHistory;
+  if (hist.length === 0) {
+    container.innerHTML = '<p class="text-gray-600 text-xs text-center py-3">尚無投注歷史</p>';
+    return;
+  }
+  container.innerHTML = hist.slice(0, 20).map(bet => {
+    const isWin = (bet.totalWin || 0) > bet.amount * bet.totalPeriods;
+    const net = (bet.totalNet || 0);
+    return `<div class="bet-card ${isWin ? 'bet-win' : 'bet-loss'} text-xs flex justify-between items-center">
+      <div>
+        <p class="text-gray-300">${bet.settledPeriod || '--'}</p>
+        <p class="text-gray-500">${bet.type === 'star' ? `${bet.stars}★` : bet.type === 'bigsmall' ? '大小單雙' : '超級獎號'}</p>
+      </div>
+      <span class="font-bold ${net >= 0 ? 'text-green-400' : 'text-red-400'}">${net >= 0 ? '+' : ''}$${net}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('history-tbody');
+  if (state.drawHistory.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-600 py-4">尚無歷史記錄</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.drawHistory.map(h => `
+    <tr class="border-b border-indigo-950">
+      <td class="text-left py-1 text-gray-400">${h.period ? String(h.period).slice(-5) : '--'}</td>
+      <td class="py-1 text-center">
+        <div class="flex flex-wrap gap-0.5 justify-center max-w-[160px] mx-auto">
+          ${h.numbers.map((n, i) => `<span class="${i===19 ? 'text-yellow-400' : 'text-gray-300'}">${String(n).padStart(2,'0')}</span>`).join(' ')}
+        </div>
+      </td>
+      <td class="text-center py-1 text-white font-bold">${h.sum}</td>
+      <td class="text-center py-1 ${h.isBig ? 'text-cyan-400' : h.isSmall ? 'text-red-400' : 'text-gray-500'} font-bold">${h.isBig ? '大' : h.isSmall ? '小' : '－'}</td>
+      <td class="text-center py-1 ${h.isOdd ? 'text-purple-400' : h.isEven ? 'text-green-400' : 'text-gray-500'} font-bold">${h.isOdd ? '單' : h.isEven ? '雙' : '－'}</td>
+    </tr>`).join('');
+}
+
+function renderPayoutRef() {
+  const el = document.getElementById('payout-ref');
+  const rows = [];
+  rows.push(`<div class="pay-row"><span class="text-gray-500">大小/單雙（≥13個）</span><span class="text-yellow-400">6倍 $150</span></div>`);
+  rows.push(`<div class="pay-row"><span class="text-gray-500">超級獎號（第20顆）</span><span class="text-yellow-400">48倍 $1,200</span></div>`);
+  for (let s = 1; s <= 10; s++) {
+    const table = PAYOUT[s];
+    const parts = Object.entries(table).map(([k,v]) => `中${k}→${v}x`).join(', ');
+    rows.push(`<div class="pay-row"><span class="text-indigo-400">${s}星</span><span class="text-gray-300">${parts}</span></div>`);
+  }
+  el.innerHTML = rows.join('');
+}
+
+function updateBetCosts() {
+  const starCost = BET_COST * state.starCols * state.starPeriods;
+  const bsCost = state.bsAmt * state.bsPeriods;
+  const spCost = state.spAmt * state.spPeriods;
+  const sc = document.getElementById('star-cost');
+  const bc = document.getElementById('bs-cost');
+  const pc = document.getElementById('sp-cost');
+  if (sc) sc.textContent = `$${starCost}`;
+  if (bc) bc.textContent = `$${bsCost}`;
+  if (pc) pc.textContent = `$${spCost}`;
+}
+
+// ══════════════════════════════════════
+//  UI INTERACTIONS
+// ══════════════════════════════════════
+function switchTab(tab) {
+  state.activeTab = tab;
+  ['star','bigsmall','super'].forEach(t => {
+    const tabEl = document.getElementById(`tab-${t}`);
+    const panelEl = document.getElementById(`panel-${t}`);
+    if (tabEl) tabEl.classList.toggle('active', t === tab);
+    if (panelEl) panelEl.classList.toggle('hidden', t !== tab);
+  });
+}
+
+function toggleNum(n) {
+  const idx = state.selectedNums.indexOf(n);
+  if (idx >= 0) {
+    state.selectedNums.splice(idx, 1);
+  } else {
+    if (state.selectedNums.length >= state.selectedStars) {
+      showToast(`最多選 ${state.selectedStars} 個號碼`); return;
+    }
+    state.selectedNums.push(n);
+  }
+  // Update just this button
+  const btn = document.querySelector(`.num-btn[data-num="${n}"]`);
+  if (btn) {
+    btn.classList.toggle('selected', idx < 0);
+    if (state.currentDraw && state.currentDraw.numbers.includes(n)) {
+      if (idx < 0) { btn.classList.remove('drawn'); btn.classList.add('matched'); }
+      else { btn.classList.remove('matched'); btn.classList.add('drawn'); }
+    }
+  }
+  document.getElementById('sel-count').textContent = state.selectedNums.length;
+}
+
+function clearSelectedNums() {
+  state.selectedNums = [];
+  renderNumberGrid();
+}
+
+function chooseBigSmall(choice) {
+  state.bsBigChoice = state.bsBigChoice === choice ? null : choice;
+  renderBigSmallPanel();
+}
+
+function chooseOddEven(choice) {
+  state.bsOddChoice = state.bsOddChoice === choice ? null : choice;
+  renderBigSmallPanel();
+}
+
+function clearSettledBets() {
+  state.betHistory = [];
+  renderBetHistory();
+  saveState();
+}
+
+function updateFetchStatus() {
+  const dot = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  const timeEl = document.getElementById('last-fetch-time');
+
+  dot.className = 's-dot';
+  if (state.fetchStatus === 'ok') {
+    dot.classList.add('s-ok');
+    text.textContent = state.lastSuccessUrl && state.lastSuccessUrl.includes('直連')
+      ? '✅ 直連成功' : '同步成功';
+  }
+  else if (state.fetchStatus === 'loading') { dot.classList.add('s-load'); text.textContent = `抓取中 #${state.retryCount || 1}...`; }
+  else if (state.fetchStatus === 'error') { dot.classList.add('s-err'); text.textContent = '無法同步（等下期）'; }
+  else { dot.classList.add('s-idle'); text.textContent = '等待開獎'; }
+
+  if (state.lastFetchTime) {
+    const t = state.lastFetchTime.toLocaleTimeString('zh-TW');
+    timeEl.textContent = state.fetchStatus === 'ok' && state._fetchScheduledAt
+      ? `${t} | 下次抓取排程中`
+      : (state._fetchAt ? `下次抓取：見上` : `上次：${t}`);
+  }
+}
+
+// ══════════════════════════════════════
+//  SETTLEMENT MODAL
+// ══════════════════════════════════════
+function showSettlementModal(results, period) {
+  let totalWin = 0, totalPaid = 0, anyWin = false;
+
+  const rows = results.map(r => {
+    totalWin += r.winAmount;
+    totalPaid += r.bet.amount;
+    if (r.winAmount > 0) anyWin = true;
+    const isWin = r.winAmount > 0;
+    return `<div class="bet-card ${isWin ? 'bet-win' : 'bet-loss'} mb-2">
+      <p class="text-xs text-gray-300 mb-0.5">${r.resultDesc}</p>
+      <div class="flex justify-between items-center">
+        <span class="text-[10px] text-gray-500">$${r.bet.amount} → </span>
+        <span class="font-bold text-sm ${isWin ? 'text-green-400' : 'text-red-400'}">
+          ${isWin ? `+$${r.winAmount}` : '-$' + r.bet.amount}
+        </span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const net = totalWin - totalPaid;
+  document.getElementById('modal-period-label').textContent = `第 ${period} 期`;
+  document.getElementById('modal-results').innerHTML = rows || '<p class="text-gray-500 text-sm text-center">無投注</p>';
+  document.getElementById('modal-net').textContent = `${net >= 0 ? '+' : ''}$${net}`;
+  document.getElementById('modal-net').className = `text-2xl font-black ${net >= 0 ? 'neon-green' : 'neon-red'}`;
+  document.getElementById('modal-credits').textContent = `$${state.credits.toLocaleString()}`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+
+  if (anyWin) showWinBurst(net);
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+function showWinBurst(amount) {
+  const burst = document.getElementById('win-burst');
+  const text = document.getElementById('win-burst-text');
+  burst.classList.remove('hidden');
+  text.textContent = amount > 500 ? '💰 大贏！' : amount > 0 ? '🎉 中獎！' : '💥 BINGO!';
+  text.style.animation = 'none';
+  void text.offsetWidth;
+  text.style.animation = 'burstAnim .8s cubic-bezier(.34,1.56,.64,1) forwards';
+  setTimeout(() => burst.classList.add('hidden'), 2500);
+}
+
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+function showToast(msg, duration = 2500) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e1b4b;border:1px solid #4f46e5;color:#c4b5fd;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;z-index:9999;box-shadow:0 0 20px rgba(79,70,229,.4);transition:opacity .3s';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.style.opacity = '0', duration);
+}
+
+// ══════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+function init() {
+  loadState();
+
+  // Render static selectors
+  renderStarSelector();
+  renderMultiSelector('cols-selector-star', 'starCols', [1,2,3,4,5]);
+  renderMultiSelector('periods-selector-star', 'starPeriods', [1,2,3,4,5]);
+  renderAmtSelector('amt-selector-bs', 'bsAmt');
+  renderMultiSelector('periods-selector-bs', 'bsPeriods', [1,2,3,4,5]);
+  renderAmtSelector('amt-selector-sp', 'spAmt');
+  renderMultiSelector('periods-selector-sp', 'spPeriods', [1,2,3,4,5]);
+
+  renderAll();
+
+  // Init empty draw board placeholders
+  if (!state.currentDraw) {
+    const grid = document.getElementById('draw-balls-grid');
+    grid.innerHTML = '';
+    for (let i = 0; i < 20; i++) {
+      const div = document.createElement('div');
+      div.className = 'draw-ball empty-ball';
+      div.style.cssText = 'width:50px;height:50px;opacity:.15;transform:scale(.8)';
+      div.innerHTML = `<span style="font-size:.6rem;color:#3730a3">${String(i+1).padStart(2,'0')}</span>`;
+      grid.appendChild(div);
+    }
+  }
+
+  // Start timers
+  state.countdownTimer = setInterval(updateCountdown, 1000);
+  updateCountdown();
+
+  // 精準排程：開獎後 65 秒再抓
+  scheduleNextFetch();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
