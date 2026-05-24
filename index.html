@@ -223,7 +223,7 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 #bet-scene-overlay{position:absolute;inset:0;z-index:30;opacity:0;transition:opacity .4s;pointer-events:none;border-radius:inherit}
 #bet-scene-overlay.show{opacity:1}
 #bet-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-#bet-wife-img{position:absolute;bottom:0;left:35%;height:85%;width:auto;object-fit:contain;image-rendering:pixelated;mix-blend-mode:multiply;transition:opacity .2s}
+#bet-wife-img{position:absolute;bottom:0;left:35%;height:85%;width:auto;object-fit:contain;image-rendering:pixelated;transition:opacity .2s}
 </style>
 </head>
 <body>
@@ -1461,8 +1461,9 @@ function triggerBetSceneAnimation() {
   if (window._betPoseTimer) { clearInterval(window._betPoseTimer); window._betPoseTimer = null; }
   if (window._betHideTimer) { clearTimeout(window._betHideTimer); window._betHideTimer = null; }
 
-  // 兩個站姿（BACK.jpg 用 mix-blend-mode:multiply 去白底）
-  const poses = ['blackview.png', 'BACK.jpg'];
+  // 暫時只用透明去背版，等 BACK.png 就位後再開兩姿勢交替
+  // const poses = ['blackview.png', 'BACK.png'];
+  const poses = ['blackview.png', 'blackview.png'];
   let poseIdx = 0;
   wifeImg.src = poses[0];
   wifeImg.style.opacity = '1';
