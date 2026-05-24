@@ -224,12 +224,11 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 #walk-overlay.visible{opacity:1}
 #walk-scene{position:relative;width:min(92vw,440px);height:min(62vw,300px);border-radius:12px;overflow:hidden;border:2px solid #4f46e5;box-shadow:0 0 50px rgba(99,102,241,.6)}
 #walk-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
-#walk-sprite-container{position:absolute;bottom:0;height:55%;aspect-ratio:1/1;overflow:hidden;transform:scaleX(-1)}
-#walk-sprite-img{display:block;width:400%;height:100%;image-rendering:pixelated}
-#walk-back-img{position:absolute;bottom:0;left:34%;height:58%;width:auto;object-fit:contain;image-rendering:pixelated;opacity:0;transition:opacity .3s}
+/* 用 background-image 取代 <img>，避免 overflow+transform 剪裁失效 */
+#walk-sprite-container{position:absolute;bottom:0;height:55%;width:33%;background-image:url(WALK.jpg);background-size:400% 100%;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;transform:scaleX(-1);mix-blend-mode:multiply}
+#walk-back-img{position:absolute;bottom:0;left:30%;height:60%;width:auto;object-fit:contain;image-rendering:pixelated;opacity:0;transition:opacity .3s}
 #walk-back-img.show{opacity:1}
-@keyframes walkCycle{from{transform:translateX(0)}to{transform:translateX(-100%)}}
-@keyframes walkAcross{from{left:-25%}to{left:42%}}
+@keyframes walkAcross{from{left:-40%}to{left:38%}}
 </style>
 </head>
 <body>
@@ -621,9 +620,7 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 <div id="walk-overlay">
   <div id="walk-scene">
     <img id="walk-bg-img" src="BG.png" alt="">
-    <div id="walk-sprite-container" style="position:absolute;bottom:0;height:55%;aspect-ratio:1/1;overflow:hidden;left:-25%;transform:scaleX(-1)">
-      <img id="walk-sprite-img" src="WALK.jpg" alt="">
-    </div>
+    <div id="walk-sprite-container" style="left:-40%"></div>
     <img id="walk-back-img" src="blackview.png" alt="" style="display:none">
   </div>
 </div>
@@ -1464,40 +1461,54 @@ function placeBet(type) {
 // ══════════════════════════════════════
 //  WALK ANIMATION (投注走向櫃台)
 // ══════════════════════════════════════
+// 4 格 WALK.jpg 的 background-position（background-size:400% 時）
+const WALK_FRAMES = ['0% 0', '33.33% 0', '66.67% 0', '100% 0'];
+
 function triggerWalkAnimation() {
   const overlay    = document.getElementById('walk-overlay');
   const spriteCont = document.getElementById('walk-sprite-container');
-  const spriteImg  = document.getElementById('walk-sprite-img');
   const backImg    = document.getElementById('walk-back-img');
   if (!overlay) return;
 
-  // Reset
-  spriteImg.style.animation = 'none';
-  spriteCont.style.cssText   = 'position:absolute;bottom:0;height:55%;aspect-ratio:1/1;overflow:hidden;left:-25%;transform:scaleX(-1)';
+  // 清除上次殘留的 frame timer
+  if (window._walkFrameTimer) { clearInterval(window._walkFrameTimer); window._walkFrameTimer = null; }
+
+  // 用 background-image 方式重設容器（不需要 <img> 子元素，解決 overflow+transform 問題）
+  spriteCont.style.cssText =
+    'position:absolute;bottom:0;height:55%;width:33%;' +
+    'background-image:url(WALK.jpg);background-size:400% 100%;' +
+    'background-repeat:no-repeat;background-position:0 0;' +
+    'image-rendering:pixelated;transform:scaleX(-1);mix-blend-mode:multiply;left:-40%';
+
   backImg.classList.remove('show');
   backImg.style.display = 'none';
   spriteCont.style.display = '';
 
-  // Fade in overlay
+  // 淡入遮罩
   overlay.classList.add('active');
   void overlay.offsetWidth;
   overlay.classList.add('visible');
 
-  // After fade-in (420ms): start sprite cycle + walk across
+  // 430ms 後開始走格 + 橫移
   setTimeout(() => {
-    spriteImg.style.animation = 'walkCycle 0.44s steps(4,end) infinite';
+    let fi = 0;
+    window._walkFrameTimer = setInterval(() => {
+      fi = (fi + 1) % 4;
+      spriteCont.style.backgroundPosition = WALK_FRAMES[fi];
+    }, 110); // ~9fps
     spriteCont.style.animation = 'walkAcross 2.4s linear forwards';
   }, 430);
 
-  // After walk finishes (430+2400=2830ms): hide walk sprite, show back view
+  // 走完後切換背影圖
   setTimeout(() => {
+    if (window._walkFrameTimer) { clearInterval(window._walkFrameTimer); window._walkFrameTimer = null; }
     spriteCont.style.display = 'none';
     backImg.style.display = 'block';
     void backImg.offsetWidth;
     backImg.classList.add('show');
   }, 2850);
 
-  // After back view (1000ms) → fade out overlay
+  // 再 1 秒後淡出
   setTimeout(() => {
     overlay.classList.remove('visible');
     setTimeout(() => {
