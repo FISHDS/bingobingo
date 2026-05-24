@@ -1461,9 +1461,8 @@ function triggerBetSceneAnimation() {
   if (window._betPoseTimer) { clearInterval(window._betPoseTimer); window._betPoseTimer = null; }
   if (window._betHideTimer) { clearTimeout(window._betHideTimer); window._betHideTimer = null; }
 
-  // 暫時只用透明去背版，等 BACK.png 就位後再開兩姿勢交替
-  // const poses = ['blackview.png', 'BACK.png'];
-  const poses = ['blackview.png', 'blackview.png'];
+  // 兩個透明去背站姿交替
+  const poses = ['blackview.png', 'BACK.png'];
   let poseIdx = 0;
   wifeImg.src = poses[0];
   wifeImg.style.opacity = '1';
