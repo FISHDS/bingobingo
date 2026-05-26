@@ -6,87 +6,88 @@
 <title>🎱 賓果賓果 虛擬投注系統</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.neon-purple{color:#c084fc;text-shadow:0 0 8px #c084fc,0 0 20px #c084fc,0 0 40px #8b5cf6}
-.neon-cyan{color:#22d3ee;text-shadow:0 0 8px #22d3ee,0 0 20px #22d3ee,0 0 40px #06b6d4}
-.neon-gold{color:#fbbf24;text-shadow:0 0 8px #fbbf24,0 0 20px #fbbf24,0 0 40px #f59e0b}
-.neon-green{color:#4ade80;text-shadow:0 0 8px #4ade80,0 0 20px #4ade80}
-.neon-red{color:#f87171;text-shadow:0 0 8px #f87171,0 0 20px #f87171}
+body{background:#fdf0ff;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.neon-purple{color:#9333ea;text-shadow:0 0 8px rgba(147,51,234,.3)}
+.neon-cyan{color:#0891b2;font-weight:900}
+.neon-gold{color:#d97706;font-weight:900}
+.neon-green{color:#16a34a;font-weight:900}
+.neon-red{color:#dc2626;font-weight:900}
 
-/* Draw balls */
-.draw-ball{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.45) 0%,transparent 60%),linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);box-shadow:0 0 14px rgba(99,102,241,.75),0 4px 10px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.3);opacity:0;transform:scale(0)}
+/* Draw balls - cute pixel style */
+.draw-ball{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.55) 0%,transparent 60%),linear-gradient(135deg,#a855f7 0%,#9333ea 100%);box-shadow:0 4px 0 #7e22ce,0 6px 12px rgba(147,51,234,.35),inset 0 2px 3px rgba(255,255,255,.4);border:2px solid #7e22ce;opacity:0;transform:scale(0)}
 .draw-ball.show{animation:dropIn .55s cubic-bezier(.34,1.56,.64,1) forwards}
-.draw-ball.super-ball{background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.45) 0%,transparent 60%),linear-gradient(135deg,#f59e0b 0%,#ef4444 100%);box-shadow:0 0 18px rgba(245,158,11,.85),0 4px 10px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.3)}
-.draw-ball.empty-ball{background:#0f0f35;border:1px dashed #312e81;opacity:1;transform:scale(1)}
+.draw-ball.super-ball{background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.55) 0%,transparent 60%),linear-gradient(135deg,#fbbf24 0%,#f97316 100%);box-shadow:0 4px 0 #c2410c,0 6px 12px rgba(249,115,22,.35);border-color:#c2410c}
+.draw-ball.empty-ball{background:#f9f0ff;border:2px dashed #c084fc;opacity:1;transform:scale(1)}
 @keyframes dropIn{0%{transform:scale(0) translateY(-25px);opacity:0}65%{transform:scale(1.18) translateY(4px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
 
 /* Number picker */
-.num-btn{height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;cursor:pointer;background:#1e1b4b;border:1px solid #312e81;color:#818cf8;transition:all .12s;user-select:none;-webkit-user-select:none}
-.num-btn:hover:not(.disabled-btn){background:#2d2a72;border-color:#6366f1;transform:scale(1.1)}
-.num-btn.selected{background:#f59e0b;border-color:#fbbf24;color:#1c1917;box-shadow:0 0 8px #f59e0b90}
-.num-btn.drawn{background:#059669;border-color:#10b981;color:#fff}
-.num-btn.matched{background:#dc2626;border-color:#ef4444;color:#fff;animation:hitFlash .35s ease 4}
+.num-btn{height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;cursor:pointer;background:#faf5ff;border:2px solid #d8b4fe;color:#7c3aed;transition:all .12s;user-select:none;-webkit-user-select:none;box-shadow:2px 2px 0 #d8b4fe}
+.num-btn:hover:not(.disabled-btn){background:#f3e8ff;border-color:#a855f7;transform:scale(1.1)}
+.num-btn.selected{background:#fbbf24;border-color:#f59e0b;color:#1c1917;box-shadow:2px 2px 0 #d97706}
+.num-btn.drawn{background:#10b981;border-color:#059669;color:#fff;box-shadow:2px 2px 0 #047857}
+.num-btn.matched{background:#f43f5e;border-color:#e11d48;color:#fff;animation:hitFlash .35s ease 4}
 .num-btn.disabled-btn{opacity:.45;cursor:not-allowed}
-@keyframes hitFlash{0%,100%{transform:scale(1)}50%{transform:scale(1.35);box-shadow:0 0 16px #ef4444}}
+@keyframes hitFlash{0%,100%{transform:scale(1)}50%{transform:scale(1.35);box-shadow:3px 3px 0 #f43f5e}}
 
 /* Tabs */
-.tab{cursor:pointer;padding:.45rem .9rem;border-radius:6px;font-weight:600;font-size:.82rem;transition:all .18s;color:#818cf8}
-.tab.active{background:#4f46e5;color:#fff;box-shadow:0 0 14px rgba(79,70,229,.5)}
-.tab:not(.active):hover{background:#1e1b4b}
+.tab{cursor:pointer;padding:.45rem .9rem;border-radius:6px;font-weight:700;font-size:.82rem;transition:all .18s;color:#9333ea}
+.tab.active{background:#9333ea;color:#fff;box-shadow:3px 3px 0 #7e22ce}
+.tab:not(.active):hover{background:#f3e8ff}
 
 /* Star selector */
-.star-btn{cursor:pointer;min-width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;background:#1e1b4b;border:2px solid #312e81;color:#818cf8;transition:all .15s}
-.star-btn.active{background:#7c3aed;border-color:#8b5cf6;color:#fff;box-shadow:0 0 12px rgba(124,58,237,.6)}
+.star-btn{cursor:pointer;min-width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;background:#faf5ff;border:2px solid #d8b4fe;color:#9333ea;transition:all .15s;box-shadow:2px 2px 0 #d8b4fe}
+.star-btn.active{background:#9333ea;border-color:#7e22ce;color:#fff;box-shadow:3px 3px 0 #7e22ce}
 
 /* Multi selector buttons */
-.multi-btn{cursor:pointer;width:38px;height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;background:#1e1b4b;border:1px solid #312e81;color:#818cf8;transition:all .12s}
-.multi-btn.active{background:#4f46e5;border-color:#6366f1;color:#fff}
+.multi-btn{cursor:pointer;width:38px;height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;background:#faf5ff;border:2px solid #d8b4fe;color:#9333ea;transition:all .12s;box-shadow:2px 2px 0 #d8b4fe}
+.multi-btn.active{background:#9333ea;border-color:#7e22ce;color:#fff;box-shadow:3px 3px 0 #7e22ce}
 
 /* Choice buttons (big/small/odd/even) */
-.choice-btn{cursor:pointer;padding:.65rem 1.3rem;border-radius:8px;font-weight:800;font-size:1.05rem;border:2px solid;transition:all .18s;user-select:none}
-.choice-btn:hover{filter:brightness(1.2);transform:scale(1.04)}
-.choice-btn.ch-active{box-shadow:0 0 18px currentColor}
+.choice-btn{cursor:pointer;padding:.65rem 1.3rem;border-radius:8px;font-weight:800;font-size:1.05rem;border:2px solid;transition:all .18s;user-select:none;box-shadow:3px 3px 0 rgba(0,0,0,.15)}
+.choice-btn:hover{filter:brightness(1.05);transform:scale(1.04)}
+.choice-btn.ch-active{filter:brightness(1.1);box-shadow:4px 4px 0 rgba(0,0,0,.25);transform:translateY(-1px)}
 
 /* Ring countdown */
 .ring-svg{transform:rotate(-90deg)}
-.ring-bg{stroke:#1e1b4b;stroke-width:4;fill:none}
-.ring-fg{stroke:#6366f1;stroke-width:4;fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.ring-bg{stroke:#e9d5ff;stroke-width:4;fill:none}
+.ring-fg{stroke:#9333ea;stroke-width:4;fill:none;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
 
-/* Video section */
+/* Video section - keep dark for live stream overlay */
 #video-section{position:relative;width:100%;height:38vh;min-height:200px;background:#000;overflow:hidden;flex-shrink:0}
 #live-stream{width:100%;height:100%;object-fit:cover}
 .v-top{position:absolute;top:0;left:0;right:0;padding:7px 14px;background:linear-gradient(to bottom,rgba(0,0,0,.8),transparent);display:flex;justify-content:space-between;align-items:center;z-index:10}
-.v-countdown{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;z-index:10;background:rgba(0,0,0,.55);padding:4px 14px;border-radius:20px;backdrop-filter:blur(4px)}
+.v-countdown{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;z-index:10;background:rgba(255,255,255,.9);padding:4px 14px;border-radius:20px;backdrop-filter:blur(4px);border:2px solid #d8b4fe}
 #sprite-wrap{display:none}
 #sprite-char{display:none}
 
-/* ══ 太太人像結果顯示（刮刮樂欄覆蓋） ══ */
-#sprite-result-wrap{position:absolute;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;pointer-events:none;opacity:0;transition:opacity .6s;background:linear-gradient(to top,rgba(5,5,24,.55) 0%,transparent 55%)}
+/* 太太人像結果顯示 */
+#sprite-result-wrap{position:absolute;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;pointer-events:none;opacity:0;transition:opacity .6s;background:linear-gradient(to top,rgba(250,245,255,.55) 0%,transparent 55%)}
 #sprite-result-wrap.show{opacity:1}
-#sprite-result-img{width:auto;max-width:85%;max-height:85%;object-fit:contain;filter:drop-shadow(0 4px 20px rgba(0,0,0,.9));display:block}
+#sprite-result-img{width:auto;max-width:85%;max-height:85%;object-fit:contain;filter:drop-shadow(0 4px 20px rgba(0,0,0,.6));display:block}
 
-/* ══ 手機底部導覽 ══ */
-#mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#0a0a2e;border-top:1px solid #312e81;height:56px;align-items:stretch}
-.mnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:#6366f1;font-size:.6rem;font-weight:700;border:none;background:none;transition:color .15s}
-.mnav-btn:active{color:#a5b4fc;background:rgba(99,102,241,.1)}
+/* 手機底部導覽 */
+#mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#fff;border-top:2px solid #e9d5ff;height:56px;align-items:stretch}
+.mnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:#9333ea;font-size:.6rem;font-weight:700;border:none;background:none;transition:color .15s}
+.mnav-btn:active{color:#7e22ce;background:rgba(147,51,234,.1)}
 .mnav-icon{font-size:1.3rem;line-height:1}
 #settle-banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s}
 #settle-banner.show{opacity:1}
-.settle-box{padding:.8rem 2rem;border-radius:14px;text-align:center;font-size:1.4rem;font-weight:900;box-shadow:0 0 40px currentColor}
+.settle-box{padding:.8rem 2rem;border-radius:14px;text-align:center;font-size:1.4rem;font-weight:900;box-shadow:4px 4px 0 rgba(0,0,0,.2)}
 @keyframes settleIn{0%{transform:scale(0) rotate(-6deg);opacity:0}65%{transform:scale(1.1) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
 /* Bottom split */
 #bottom-split{display:flex;flex:1;overflow:hidden;min-height:0}
-.left-panel{width:50%;overflow-y:auto;padding:8px;border-right:1px solid #1e1b4b;display:flex;flex-direction:column;gap:8px}
-.right-panel{width:50%;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
+.left-panel{width:50%;overflow-y:auto;padding:8px;border-right:2px solid #e9d5ff;display:flex;flex-direction:column;gap:8px;background:#fdf0ff}
+.right-panel{width:50%;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px;background:#fdf0ff}
 
 /* Section label */
-.s-lbl{font-size:.65rem;font-weight:700;letter-spacing:.15em;color:#6366f1;text-transform:uppercase;margin-bottom:.35rem}
+.s-lbl{font-size:.65rem;font-weight:700;letter-spacing:.15em;color:#9333ea;text-transform:uppercase;margin-bottom:.35rem}
 
 /* Bet cards */
-.bet-card{background:linear-gradient(135deg,rgba(30,27,75,.35),rgba(30,41,59,.4));border:1px solid #3730a3;border-radius:8px;padding:.7rem}
-.bet-win{border-color:#10b981 !important;background:linear-gradient(135deg,rgba(6,78,59,.25),rgba(6,95,70,.2)) !important}
-.bet-loss{border-color:#dc2626 !important;background:linear-gradient(135deg,rgba(127,29,29,.25),rgba(153,27,27,.2)) !important}
+.bet-card{background:#fff;border:2px solid #e9d5ff;border-radius:8px;padding:.7rem;box-shadow:2px 2px 0 #e9d5ff}
+.bet-win{border-color:#86efac !important;background:#f0fdf4 !important;box-shadow:2px 2px 0 #86efac !important}
+.bet-loss{border-color:#fca5a5 !important;background:#fff5f5 !important;box-shadow:2px 2px 0 #fca5a5 !important}
 
 /* Status dot */
 .s-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
@@ -97,91 +98,74 @@ body{background:#050518;font-family:'Segoe UI',system-ui,sans-serif;height:100vh
 @keyframes sPulse{0%,100%{opacity:1}50%{opacity:.35}}
 
 /* Settlement modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.modal-box{background:linear-gradient(135deg,#0f0a2e,#0f172a);border:1px solid #4f46e5;border-radius:16px;max-width:500px;width:94%;max-height:85vh;overflow-y:auto;box-shadow:0 0 40px rgba(79,70,229,.4)}
+.modal-bg{position:fixed;inset:0;background:rgba(250,245,255,.92);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-box{background:#fff;border:3px solid #c084fc;border-radius:16px;max-width:500px;width:94%;max-height:85vh;overflow-y:auto;box-shadow:6px 6px 0 #e9d5ff}
 
 /* Credits change animation */
-@keyframes credUp{0%{transform:translateY(0);color:#fbbf24}50%{transform:translateY(-8px);color:#4ade80}100%{transform:translateY(0);color:#fbbf24}}
-@keyframes credDown{0%{transform:translateY(0);color:#fbbf24}50%{transform:translateY(8px);color:#f87171}100%{transform:translateY(0);color:#fbbf24}}
+@keyframes credUp{0%{transform:translateY(0);color:#d97706}50%{transform:translateY(-8px);color:#16a34a}100%{transform:translateY(0);color:#d97706}}
+@keyframes credDown{0%{transform:translateY(0);color:#d97706}50%{transform:translateY(8px);color:#dc2626}100%{transform:translateY(0);color:#d97706}}
 .cred-up{animation:credUp .6s ease}
 .cred-down{animation:credDown .6s ease}
 
 /* Flash new draw board */
-@keyframes boardFlash{0%,100%{border-color:#3730a3}50%{border-color:#6366f1;box-shadow:0 0 30px rgba(99,102,241,.45)}}
+@keyframes boardFlash{0%,100%{border-color:#e9d5ff}50%{border-color:#c084fc;box-shadow:0 0 16px rgba(192,132,252,.3)}}
 .board-flash{animation:boardFlash 1.2s ease 3}
 
 /* Win burst overlay */
 .win-burst{position:fixed;inset:0;pointer-events:none;z-index:999;display:flex;align-items:center;justify-content:center}
-.win-burst-text{font-size:4rem;font-weight:900;color:#fbbf24;text-shadow:0 0 30px #fbbf24;animation:burstAnim .8s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0}
+.win-burst-text{font-size:3rem;font-weight:900;color:#fbbf24;text-shadow:4px 4px 0 #d97706,8px 8px 0 rgba(0,0,0,.15);animation:burstAnim .8s cubic-bezier(.34,1.56,.64,1) forwards;opacity:0;font-family:'Press Start 2P',cursive}
 @keyframes burstAnim{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2);opacity:1}80%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
 
 /* Payout table */
-.pay-row{display:flex;justify-content:space-between;padding:.18rem 0;border-bottom:1px solid #1e1b4b}
+.pay-row{display:flex;justify-content:space-between;padding:.18rem 0;border-bottom:1px solid #f3e8ff}
 
 /* Scrollbar */
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:#0a0a1a}
-::-webkit-scrollbar-thumb{background:#4f46e5;border-radius:2px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#f9f5ff}
+::-webkit-scrollbar-thumb{background:#c084fc;border-radius:3px}
 
-/* ══ 手機版響應式設計 ══ */
+/* 手機版響應式設計 */
 @media(max-width:640px){
-  /* 底部 nav 佔位 */
   body{padding-bottom:56px}
-
-  /* 頭部縮小 */
   header{padding:.4rem .8rem !important}
   header h1{font-size:1rem !important}
   header .text-2xl{font-size:1.3rem !important}
-
-  /* 頂部區域：垂直堆疊 */
   #top-section{flex-direction:column;min-height:auto}
-
-  /* 影片欄：全寬，高度 56vw */
   #video-col{width:100% !important;min-height:0 !important;height:56vw}
   #video-section{position:absolute !important;inset:0;height:100% !important}
   #live-stream{width:100%;height:100%;object-fit:contain !important}
-
-  /* 刮刮樂欄：全寬，高度自適應 */
-  #scratch-col{width:100% !important;min-height:auto !important;border-left:none !important;border-top:1px solid #1e1b4b}
+  #scratch-col{width:100% !important;min-height:auto !important;border-left:none !important;border-top:2px solid #e9d5ff}
   #scratch-shop{padding:12px;gap:10px}
   #sc-card{max-width:100%}
-
-  /* 賓果投注區：垂直堆疊 */
   #bottom-split{flex-direction:column;min-height:auto !important;overflow:visible !important}
   .left-panel,.right-panel{width:100% !important;overflow-y:visible !important;max-height:none !important}
-
-  /* 號碼格縮小 */
   .num-btn{height:30px;font-size:.72rem}
   .draw-ball{width:38px;height:38px;font-size:.72rem}
-
-  /* 太太人像手機版：維持全欄覆蓋，圖片縮小一點 */
   #sprite-result-img{max-height:70% !important}
-
-  /* 底部導覽列 */
   #mobile-nav{display:flex}
 }
 
-/* ══ Layout overrides for scrollable page ══ */
+/* Layout overrides for scrollable page */
 body{height:auto !important;overflow:auto !important;display:block !important}
 
-/* ══ Top section ══ */
+/* Top section */
 #top-section{display:flex;min-height:480px}
 #video-col{width:50%;position:relative;background:#000;flex-shrink:0;min-height:480px}
 #video-section{position:absolute !important;inset:0;height:auto !important}
 #live-stream{object-fit:contain !important;background:#000}
 
-/* ══ Scratch column ══ */
-#scratch-col{width:50%;background:#0a0a22;border-left:1px solid #1e1b4b;overflow-y:auto;display:flex;flex-direction:column;min-height:480px}
+/* Scratch column */
+#scratch-col{width:50%;background:#fff;border-left:2px solid #e9d5ff;overflow-y:auto;display:flex;flex-direction:column;min-height:480px}
 
-/* ══ Scratch shop ══ */
+/* Scratch shop */
 #scratch-shop{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:16px}
-.sc-shop-preview{background:#FFE600;border-radius:10px;padding:14px;text-align:center;border:3px solid #cc0000;width:90%;max-width:320px;cursor:pointer;transition:transform .15s}
+.sc-shop-preview{background:#FFE600;border-radius:10px;padding:14px;text-align:center;border:3px solid #cc0000;width:90%;max-width:320px;cursor:pointer;transition:transform .15s;box-shadow:4px 4px 0 #aa0000}
 .sc-shop-preview:hover{transform:scale(1.02)}
 .sc-777-big{font-size:2.4rem;font-weight:900;color:#cc0000;text-shadow:3px 3px 0 #800000;display:block}
 
-/* ══ Scratch game ══ */
+/* Scratch game */
 #scratch-game{display:flex;flex-direction:column;align-items:center;padding:10px;gap:8px;flex:1}
-#sc-card{width:100%;max-width:460px;background:#FFE600;border-radius:10px;overflow:hidden;font-family:'Segoe UI',sans-serif;box-shadow:0 4px 24px rgba(0,0,0,.6)}
+#sc-card{width:100%;max-width:460px;background:#FFE600;border-radius:10px;overflow:hidden;font-family:'Segoe UI',sans-serif;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
 #sc-header{padding:8px 10px}
 .sc-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .sc-price{background:#cc0000;color:#fff;font-size:.68rem;font-weight:900;padding:2px 8px;border-radius:4px}
@@ -189,7 +173,6 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 .sc-serial{font-size:.6rem;color:#666;border:1px solid #999;padding:1px 6px;border-radius:3px}
 .sc-rule-text{font-size:.58rem;color:#333;max-width:180px;line-height:1.3;text-align:right}
 .sc-jackpot{font-size:1rem;font-weight:900;color:#cc0000;margin-top:2px}
-/* ══ Scratch area ══ */
 #sc-area{position:relative;display:flex;gap:6px;padding:8px;background:#7FDCF0;border-top:3px solid #cc0000;border-bottom:3px solid #cc0000;min-height:160px}
 #sc-left{flex:1}
 #sc-left-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:3px;height:136px}
@@ -206,35 +189,63 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 .sc-rnum.is07{color:#cc0000}
 .sc-rlbl{font-size:.4rem;color:#aaa}
 #sc-footer{padding:5px 10px;font-size:.58rem;color:#333;border-top:2px dashed #cc0000;background:#FFE600;line-height:1.4}
-/* canvas */
 #scratch-canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
-/* win effects */
 .sc-lcell.win-match{background:#fffacd !important;border-color:#f00 !important;box-shadow:0 0 10px gold;animation:scPop .35s ease 5}
 .sc-rcell.win-line{background:#fffacd !important;border-color:#f00 !important;box-shadow:0 0 10px gold;animation:scPop .35s ease 5}
 .sc-lcell.lucky7{background:#FFE600 !important;border-color:#f00 !important;animation:scPop .35s ease 6}
 @keyframes scPop{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 
-/* ══ Bingo section ══ */
-#bingo-section{border-top:2px solid #312e81}
+/* Bingo section */
+#bingo-section{border-top:2px solid #e9d5ff}
 #bottom-split{display:flex;min-height:0}
 
-/* ══ 投注場景覆蓋層（蓋在開獎板上） ══ */
+/* 投注場景覆蓋層 */
 #draw-board{position:relative;overflow:hidden}
 #bet-scene-overlay{position:absolute;inset:0;z-index:30;opacity:0;transition:opacity .4s;pointer-events:none;border-radius:inherit}
 #bet-scene-overlay.show{opacity:1}
 #bet-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
 #bet-wife-img{position:absolute;bottom:-6%;left:35%;height:85%;width:auto;object-fit:contain;image-rendering:pixelated;transition:opacity .2s}
+
+/* ══ Tailwind class overrides for kawaii pixel theme ══ */
+.bg-\[\#0a0a2e\]{background-color:#faf5ff !important}
+.bg-\[\#0f0f35\]{background-color:#f3e8ff !important}
+.border-indigo-900{border-color:#e9d5ff !important}
+.border-indigo-950{border-color:#f3e8ff !important}
+.text-indigo-400{color:#9333ea !important}
+.v-top .text-indigo-400{color:rgba(216,180,254,.9) !important}
+.text-indigo-200{color:#6d28d9 !important}
+.v-top .text-indigo-200{color:#ede9fe !important}
+.text-indigo-300{color:#7c3aed !important}
+.text-gray-300{color:#374151 !important}
+.text-gray-400{color:#6b7280 !important}
+.text-gray-500{color:#4b5563 !important}
+.text-gray-600{color:#374151 !important}
+.text-cyan-400{color:#0e7490 !important}
+.text-purple-400{color:#9333ea !important}
+.text-green-400{color:#15803d !important}
+.text-red-400{color:#be123c !important}
+.bg-indigo-600{background-color:#9333ea !important}
+.hover\:bg-indigo-500:hover{background-color:#a855f7 !important}
+.active\:bg-indigo-700:active{background-color:#7e22ce !important}
+.bg-indigo-900\/30{background-color:rgba(147,51,234,.1) !important}
+.hover\:text-indigo-200:hover{color:#7c3aed !important}
+.hover\:text-indigo-300:hover{color:#9333ea !important}
+.hover\:text-red-400:hover{color:#dc2626 !important}
+.hover\:text-red-300:hover{color:#e11d48 !important}
+.hover\:shadow-indigo-500\/30:hover{box-shadow:3px 3px 0 rgba(147,51,234,.2) !important}
+.hover\:bg-indigo-500{background-color:#a855f7}
+.shadow-xl{box-shadow:0 4px 0 #e9d5ff,0 6px 20px rgba(147,51,234,.12) !important}
 </style>
 </head>
 <body>
 
 <!-- ═══ HEADER ═══ -->
-<header class="bg-[#0a0a2e] border-b border-indigo-900 px-4 py-2.5 flex items-center justify-between sticky top-0 z-50 shadow-xl">
+<header class="bg-white border-b border-indigo-900 px-4 py-2.5 flex items-center justify-between sticky top-0 z-50 shadow-xl">
   <div class="flex items-center gap-2.5">
     <span class="text-3xl">🎱</span>
     <div>
-      <h1 class="text-xl font-black leading-tight neon-purple">賓果賓果</h1>
-      <p class="text-[10px] text-indigo-400 tracking-widest">BINGO BINGO 虛擬投注</p>
+      <h1 class="leading-tight neon-purple" style="font-family:'Press Start 2P',cursive;font-size:.95rem">賓果賓果</h1>
+      <p class="text-[10px] tracking-widest" style="color:#a855f7">BINGO BINGO 虛擬投注</p>
     </div>
   </div>
   <div class="flex items-center gap-4">
@@ -348,8 +359,8 @@ body{height:auto !important;overflow:auto !important;display:block !important}
       </div>
     </div>
     <div style="display:flex;gap:8px;justify-content:center;width:100%;max-width:460px">
-      <button onclick="autoRevealAll()" style="flex:1;padding:.5rem;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">⚡ 全部揭開</button>
-      <button onclick="resetScratch()" style="flex:1;padding:.5rem;background:#374151;color:#d1d5db;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer">🎴 再買一張</button>
+      <button onclick="autoRevealAll()" style="flex:1;padding:.5rem;background:#9333ea;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;box-shadow:3px 3px 0 #7e22ce">⚡ 全部揭開</button>
+      <button onclick="resetScratch()" style="flex:1;padding:.5rem;background:#f3e8ff;color:#7c3aed;border:2px solid #d8b4fe;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;box-shadow:3px 3px 0 #d8b4fe">🎴 再買一張</button>
     </div>
     <div id="sc-result-msg" style="min-height:28px;text-align:center;font-weight:900;font-size:1rem"></div>
   </div>
@@ -362,10 +373,10 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 
 <!-- ═══ BINGO SECTION ═══ -->
 <div id="bingo-section">
-<div style="padding:6px 12px;background:#080820;border-bottom:1px solid #1e1b4b;display:flex;align-items:center;gap:8px">
+<div style="padding:6px 12px;background:#faf5ff;border-bottom:2px solid #e9d5ff;display:flex;align-items:center;gap:8px">
   <span style="font-size:1.1rem">🎱</span>
-  <span style="font-size:.8rem;font-weight:700;color:#818cf8;letter-spacing:.1em">BINGO BINGO 投注區</span>
-  <span style="font-size:.65rem;color:#4b5563">↓ 向下滾動</span>
+  <span style="font-size:.8rem;font-weight:700;color:#9333ea;letter-spacing:.1em">BINGO BINGO 投注區</span>
+  <span style="font-size:.65rem;color:#9ca3af">↓ 向下滾動</span>
 </div>
 <!-- ═══ BOTTOM SPLIT ═══ -->
 <div id="bottom-split">
@@ -527,11 +538,11 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 
       <!-- Stats row -->
       <div class="grid grid-cols-2 gap-2">
-        <div class="bg-[#0f0f35] rounded-lg p-2.5 text-center border border-indigo-950">
+        <div class="rounded-lg p-2.5 text-center" style="background:#f3e8ff;border:2px solid #e9d5ff;box-shadow:2px 2px 0 #e9d5ff">
           <p class="s-lbl mb-0.5">大小</p>
           <p class="text-2xl font-black leading-tight" id="stat-bigsmall">--</p>
         </div>
-        <div class="bg-[#0f0f35] rounded-lg p-2.5 text-center border border-indigo-950">
+        <div class="rounded-lg p-2.5 text-center" style="background:#f3e8ff;border:2px solid #e9d5ff;box-shadow:2px 2px 0 #e9d5ff">
           <p class="s-lbl mb-0.5">單雙</p>
           <p class="text-2xl font-black leading-tight" id="stat-oddeven">--</p>
         </div>
@@ -584,7 +595,7 @@ body{height:auto !important;overflow:auto !important;display:block !important}
     <p style="font-size:.82rem;color:#9ca3af;margin-bottom:1.2rem">請老公輸入密碼補充 $10,000 點吧！</p>
     <input id="hubby-pin" type="password" maxlength="8"
       placeholder="老公密碼"
-      style="width:100%;padding:.6rem 1rem;border-radius:8px;border:2px solid #4f46e5;background:#0f0f35;color:#fff;font-size:1.1rem;text-align:center;letter-spacing:.3em;outline:none;margin-bottom:.8rem"
+      style="width:100%;padding:.6rem 1rem;border-radius:8px;border:2px solid #9333ea;background:#faf5ff;color:#2d1b69;font-size:1.1rem;text-align:center;letter-spacing:.3em;outline:none;margin-bottom:.8rem"
       onkeydown="if(event.key==='Enter')confirmHubbyPin()">
     <div style="display:flex;gap:10px;justify-content:center">
       <button onclick="confirmHubbyPin()"
@@ -1536,7 +1547,7 @@ function updateCountdown() {
   const ring = document.getElementById('ring-fg');
   if (ring) {
     ring.style.strokeDashoffset = offset;
-    ring.style.stroke = secsLeft < 30 ? '#ef4444' : secsLeft < 60 ? '#f59e0b' : '#6366f1';
+    ring.style.stroke = secsLeft < 30 ? '#ef4444' : secsLeft < 60 ? '#f59e0b' : '#9333ea';
   }
 
   // Status text
@@ -1791,13 +1802,13 @@ function renderPayoutRef() {
 
   // 大小單雙 & 超級獎號 快覽
   let html = `<div class="flex gap-2 mb-2">
-    <div class="flex-1 bg-[#0f0f35] rounded p-1.5 text-center border border-indigo-950">
+    <div class="flex-1 bg-[#f3e8ff] rounded p-1.5 text-center border border-[#e9d5ff]">
       <p class="text-[9px] text-gray-500">大小 / 單雙（≥13個）</p>
-      <p class="text-xs text-yellow-400 font-bold">6倍 → $150</p>
+      <p class="text-xs font-bold" style="color:#d97706">6倍 → $150</p>
     </div>
-    <div class="flex-1 bg-[#0f0f35] rounded p-1.5 text-center border border-indigo-950">
+    <div class="flex-1 bg-[#f3e8ff] rounded p-1.5 text-center border border-[#e9d5ff]">
       <p class="text-[9px] text-gray-500">超級獎號（第20球）</p>
-      <p class="text-xs text-yellow-400 font-bold">48倍 → $1,200</p>
+      <p class="text-xs font-bold" style="color:#d97706">48倍 → $1,200</p>
     </div>
   </div>`;
 
@@ -1805,27 +1816,27 @@ function renderPayoutRef() {
   html += '<div class="overflow-x-auto"><table style="border-collapse:collapse;width:100%">';
   // header
   html += '<thead><tr>';
-  html += '<th style="background:#0f0f35;color:#818cf8;padding:3px 4px;text-align:center;border:1px solid #1e1b4b;font-size:8px;white-space:nowrap">中\\玩法</th>';
+  html += '<th style="background:#f3e8ff;color:#9333ea;padding:3px 4px;text-align:center;border:1px solid #e9d5ff;font-size:8px;white-space:nowrap">中\\玩法</th>';
   for (const s of stars) {
-    html += `<th style="background:#0f0f35;color:#a5b4fc;padding:3px 4px;text-align:center;border:1px solid #1e1b4b;font-size:8px">${s}★</th>`;
+    html += `<th style="background:#f3e8ff;color:#7c3aed;padding:3px 4px;text-align:center;border:1px solid #e9d5ff;font-size:8px">${s}★</th>`;
   }
   html += '</tr></thead><tbody>';
 
   // rows: 中球數由高到低
   for (let hits = 10; hits >= 0; hits--) {
     html += '<tr>';
-    html += `<td style="background:#080820;color:#94a3b8;padding:3px 4px;text-align:center;border:1px solid #1e1b4b;font-size:8px;font-weight:700">${hits}</td>`;
+    html += `<td style="background:#faf5ff;color:#6b7280;padding:3px 4px;text-align:center;border:1px solid #e9d5ff;font-size:8px;font-weight:700">${hits}</td>`;
     for (const s of stars) {
       if (hits > s) {
-        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #1e1b4b;color:#1e1b4b;font-size:8px">-</td>`;
+        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #e9d5ff;color:#d8b4fe;font-size:8px">-</td>`;
         continue;
       }
       const table = PAYOUT[s] || {};
       const mult = table[hits];
       if (mult === undefined) {
-        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #1e1b4b;color:#374151;font-size:8px">-</td>`;
+        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #e9d5ff;color:#c4b5fd;font-size:8px">-</td>`;
       } else if (mult === 0) {
-        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #1e1b4b;color:#374151;font-size:8px">0</td>`;
+        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #e9d5ff;color:#c4b5fd;font-size:8px">0</td>`;
       } else {
         const prize = mult * BET_COST;
         let label;
@@ -1834,9 +1845,9 @@ function renderPayoutRef() {
         else if (prize >= 1000) label = prize.toLocaleString();
         else label = String(prize);
         const isTop = prize >= 1000;
-        const color = isTop ? '#fbbf24' : '#d1d5db';
-        const bg = isTop ? 'rgba(251,191,36,.08)' : 'transparent';
-        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #1e1b4b;color:${color};background:${bg};font-size:8px;font-weight:${isTop?'700':'400'}">${label}</td>`;
+        const color = isTop ? '#d97706' : '#374151';
+        const bg = isTop ? 'rgba(251,191,36,.12)' : 'transparent';
+        html += `<td style="padding:3px 2px;text-align:center;border:1px solid #e9d5ff;color:${color};background:${bg};font-size:8px;font-weight:${isTop?'700':'400'}">${label}</td>`;
       }
     }
     html += '</tr>';
@@ -2000,7 +2011,7 @@ function showToast(msg, duration = 2500) {
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'toast';
-    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e1b4b;border:1px solid #4f46e5;color:#c4b5fd;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;z-index:9999;box-shadow:0 0 20px rgba(79,70,229,.4);transition:opacity .3s';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid #9333ea;color:#7c3aed;padding:.6rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:700;z-index:9999;box-shadow:3px 3px 0 #e9d5ff;transition:opacity .3s';
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
