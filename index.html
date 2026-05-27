@@ -1277,7 +1277,7 @@ async function onNewDraw(drawData) {
   await animateDraw(drawData.numbers);
 
   // 更新歷史開獎面板
-  renderDrawHistoryPanel(state.drawHistory);
+  mergeAndRenderHistory([]);
 
   // Settle bets
   const settlementResults = settleBets(drawData.numbers, drawData.period, stats);
@@ -1793,7 +1793,7 @@ function renderBetHistory() {
 }
 
 function renderHistory() {
-  renderDrawHistoryPanel(state.drawHistory);
+  mergeAndRenderHistory([]);
 }
 
 function renderPayoutRef() {
@@ -2171,24 +2171,24 @@ function toggleVideoSound() {
 //  DRAW HISTORY (近期開獎紀錄)
 // ══════════════════════════════════════
 async function fetchDrawHistoryData() {
-  const HISTORY_ENDPOINTS = [
-    'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/BingoResultList',
-    'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/LatestBingoResult',
-  ];
-
+  // ── JSON API 解析（台彩官方，多期回傳格式） ──
   function parseHistoryJson(json) {
+    // 嘗試各種可能的 key 名稱
     const posts = json?.content?.lotteryBingoHistoryPosts
       || json?.content?.lotteryBingoPosts
+      || json?.content?.lotteryBingoPosts2
       || json?.content?.posts
+      || json?.content?.list
+      || json?.content?.result
       || (Array.isArray(json?.content) ? json.content : null)
       || (Array.isArray(json) ? json : null);
     if (Array.isArray(posts) && posts.length > 0) {
       const arr = posts.slice(0, 20).map(post => {
-        const raw = post.openShowOrder ?? post.bigShowOrder;
+        const raw = post.openShowOrder ?? post.bigShowOrder ?? post.numbers;
         if (!Array.isArray(raw)) return null;
         const nums = raw.map(Number).filter(n => n >= 1 && n <= 80);
         if (nums.length !== 20) return null;
-        return { period: String(post.drawTerm ?? ''), numbers: nums, time: post.dDate ?? '', ...computeDrawStats(nums) };
+        return { period: String(post.drawTerm ?? post.issueNo ?? post.lotteryNo ?? ''), numbers: nums, time: post.dDate ?? post.drawTime ?? '', ...computeDrawStats(nums) };
       }).filter(Boolean);
       if (arr.length > 0) return arr;
     }
@@ -2197,7 +2197,49 @@ async function fetchDrawHistoryData() {
     return null;
   }
 
-  // 先試本地 proxy
+  // ── HTML 多列解析（適用 mydwpc 及其他直播站） ──
+  function parseMultiRowHtml(html) {
+    const rows = [];
+    // 方法1：解析 <tr> 標籤內容
+    const trMatches = [...html.matchAll(/<tr[\s\S]*?<\/tr>/gi)];
+    for (const [rowHtml] of trMatches) {
+      const periodMatch = rowHtml.match(/\b(1\d{8}|\d{6,9})\b/);
+      if (!periodMatch) continue;
+      // 提取該 row 內的所有數字
+      const nums = [...rowHtml.matchAll(/>0?([1-9]\d?|80)</g)]
+        .map(m => parseInt(m[1])).filter(n => n >= 1 && n <= 80);
+      const unique = [...new Set(nums)];
+      if (unique.length !== 20) continue;
+      rows.push({ period: periodMatch[1], numbers: unique, ...computeDrawStats(unique) });
+    }
+    if (rows.length >= 3) return rows.slice(0, 20);
+
+    // 方法2：掃描期號附近的上下文（應對 div 結構）
+    const periodPositions = [...html.matchAll(/\b(1150\d{5})\b/g)];
+    for (const m of periodPositions) {
+      const ctx = html.slice(Math.max(0, m.index - 50), m.index + 600);
+      const nums = [...ctx.matchAll(/\b(0?[1-9]|[1-7]\d|80)\b/g)]
+        .map(m2 => parseInt(m2[1])).filter(n => n >= 1 && n <= 80);
+      const unique = [...new Set(nums)];
+      if (unique.length !== 20) continue;
+      // 提取時間
+      const timeMatch = ctx.match(/(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2})/);
+      rows.push({ period: m[1], numbers: unique, time: timeMatch?.[1] ?? '', ...computeDrawStats(unique) });
+    }
+    if (rows.length >= 2) return rows.slice(0, 20);
+    return null;
+  }
+
+  const HISTORY_ENDPOINTS = [
+    // 台彩官方（可能有列表 API）
+    'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/BingoResultList',
+    'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/BingoResult',
+    'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/LatestBingoResult',
+    // mydwpc 完整歷史頁面
+    'https://www.lotto.mydwpc.com/%E8%B3%93%E6%9E%9Cbingo%E7%9B%B4%E6%92%AD/',
+  ];
+
+  // 先試本地 proxy（只有最新一期，但可信賴）
   try {
     const ctrl = new AbortController();
     setTimeout(() => ctrl.abort(), 3000);
@@ -2205,30 +2247,67 @@ async function fetchDrawHistoryData() {
     if (res.ok) {
       const json = await res.json();
       const data = parseHistoryJson(json);
-      if (data) { renderDrawHistoryPanel(data); return; }
+      if (data && data.length >= 1) {
+        // 本地 proxy 只有最新 1 期，先顯示，再繼續抓更多
+        mergeAndRenderHistory(data);
+      }
     }
   } catch(e) {}
 
-  // 再用 CORS proxy 搭配每個端點
+  // 用 CORS proxy 搭配端點輪試
   for (const endpoint of HISTORY_ENDPOINTS) {
+    const isHtml = endpoint.includes('mydwpc') || endpoint.includes('.com/') && !endpoint.includes('api.');
     for (const proxy of CORS_PROXIES) {
       try {
         const url = proxy ? proxy + encodeURIComponent(endpoint) : endpoint;
         const ctrl = new AbortController();
-        setTimeout(() => ctrl.abort(), 8000);
-        const res = await fetch(url, { signal: ctrl.signal, headers: { 'Accept': 'application/json' } });
+        setTimeout(() => ctrl.abort(), 10000);
+        const res = await fetch(url, { signal: ctrl.signal, headers: { 'Accept': isHtml ? 'text/html' : 'application/json' } });
         if (!res.ok) continue;
-        const json = await res.json();
-        const data = parseHistoryJson(json);
-        if (data) { renderDrawHistoryPanel(data); return; }
+        const text = await res.text();
+        let data = null;
+        if (isHtml) {
+          data = parseMultiRowHtml(text);
+        } else {
+          try { data = parseHistoryJson(JSON.parse(text)); } catch(e) {}
+          if (!data) data = parseMultiRowHtml(text);
+        }
+        if (data && data.length >= 2) {
+          mergeAndRenderHistory(data);
+          return; // 成功，停止嘗試
+        }
       } catch(e) {}
     }
   }
 
-  // Fallback：用 state.drawHistory
-  if (state.drawHistory.length > 0) {
-    renderDrawHistoryPanel(state.drawHistory);
+  // 最終 fallback：用 session 累積的 drawHistory（排序過濾）
+  mergeAndRenderHistory([]);
+}
+
+function mergeAndRenderHistory(freshData) {
+  // 合併 freshData 與 state.drawHistory，去重、排序、過濾過期
+  const combined = [...freshData];
+  const existingPeriods = new Set(combined.map(h => h.period));
+
+  // 加入 session 歷史，但過濾掉與 fresh 重複或差距太大的
+  const latestPeriod = combined.length > 0
+    ? Math.max(...combined.map(h => parseInt(h.period) || 0))
+    : 0;
+
+  for (const h of state.drawHistory) {
+    const p = parseInt(h.period) || 0;
+    if (existingPeriods.has(h.period)) continue;
+    // 若有 fresh 資料，只接受近 50 期內的 session 資料
+    if (latestPeriod > 0 && latestPeriod - p > 50) continue;
+    combined.push(h);
+    existingPeriods.add(h.period);
   }
+
+  // 依期號排序（最新在上）
+  combined.sort((a, b) => (parseInt(b.period) || 0) - (parseInt(a.period) || 0));
+  const final = combined.slice(0, 20);
+
+  if (final.length > 0) renderDrawHistoryPanel(final);
 }
 
 function renderDrawHistoryPanel(historyArr) {
