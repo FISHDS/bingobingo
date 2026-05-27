@@ -348,7 +348,10 @@ body{height:auto !important;overflow:auto !important;display:block !important}
     <div id="panel-star">
       <!-- Star selector -->
       <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900 mb-3">
-        <p class="s-lbl">選擇星數 <span class="text-gray-500 normal-case font-normal text-[10px]">（需選 N 個號碼，最高賠率更豐厚）</span></p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem">
+          <span style="font-family:'Press Start 2P',cursive;font-size:.48rem;color:#9333ea;letter-spacing:.03em">📡 當期期號</span>
+          <span style="font-family:'Press Start 2P',cursive;font-size:.58rem;color:#7c3aed;font-weight:900;letter-spacing:.02em" id="bet-tab-period">--</span>
+        </div>
         <div class="flex flex-wrap gap-1.5" id="star-selector"></div>
       </div>
       <!-- Number grid -->
@@ -726,6 +729,7 @@ const AMOUNT_OPTIONS = [25, 50, 100, 200, 500];
 let state = {
   credits: INITIAL_CREDITS,
   lastSettledPeriod: null,
+  lastSettledNumbers: null,
   pendingBets: [],
   betHistory: [],
   drawHistory: [],
@@ -763,6 +767,7 @@ function saveState() {
     localStorage.setItem('bb_v2', JSON.stringify({
       credits: state.credits,
       lastSettledPeriod: state.lastSettledPeriod,
+      lastSettledNumbers: state.lastSettledNumbers,
       pendingBets: state.pendingBets,
       betHistory: state.betHistory.slice(-50),
       drawHistory: state.drawHistory.slice(-10),
@@ -779,6 +784,7 @@ function loadState() {
     const saved = JSON.parse(raw);
     state.credits = typeof saved.credits === 'number' ? saved.credits : INITIAL_CREDITS;
     state.lastSettledPeriod = saved.lastSettledPeriod || null;
+    state.lastSettledNumbers = saved.lastSettledNumbers || null;
     state.pendingBets = saved.pendingBets || [];
     state.betHistory = saved.betHistory || [];
     state.drawHistory = saved.drawHistory || [];
@@ -1202,7 +1208,8 @@ async function fetchLatestDraw() {
     state.fetchStatus = 'ok';
     state.lastSuccessUrl = successUrl;
     const period = drawData.period || generatePeriodId();
-    if (period !== state.lastSettledPeriod) {
+    const numsKey = drawData.numbers.join(',');
+    if (period !== state.lastSettledPeriod && numsKey !== state.lastSettledNumbers) {
       await onNewDraw({ ...drawData, period });
     } else {
       state.currentDraw = { ...drawData, period };
@@ -1275,11 +1282,14 @@ async function onNewDraw(drawData) {
   // Settle bets
   const settlementResults = settleBets(drawData.numbers, drawData.period, stats);
   state.lastSettledPeriod = drawData.period;
+  state.lastSettledNumbers = drawData.numbers.join(',');
 
   renderAll();
 
   // Show settlement if there were bets
   if (settlementResults.length > 0) {
+    const hasWin = settlementResults.some(r => r.winAmount > 0);
+    playSfx(hasWin ? 'win' : 'lose');
     showSettlementModal(settlementResults, drawData.period);
   }
 }
@@ -1306,6 +1316,7 @@ async function animateDraw(numbers) {
     ballEl.className = `draw-ball${isLast ? ' super-ball' : ''} show flex items-center justify-content-center`;
     ballEl.style.cssText = `width:50px;height:50px;animation-delay:0s`;
     ballEl.innerHTML = `<span style="font-size:.88rem;color:#fff;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.5)">${String(numbers[i]).padStart(2,'0')}</span>`;
+    if (i % 4 === 0) playSfx('ball');
   }
 
   // Update stats
@@ -1417,7 +1428,7 @@ function placeBet(type) {
   }
 
   let cost = 0;
-  let bet = { id: Date.now(), type, status: 'pending', placedAt: new Date().toLocaleTimeString('zh-TW') };
+  let bet = { id: Date.now(), type, status: 'pending', placedAt: new Date().toLocaleTimeString('zh-TW'), startedPeriod: state.currentDraw?.period || '--' };
 
   if (type === 'star') {
     if (state.selectedNums.length !== state.selectedStars) {
@@ -1447,6 +1458,7 @@ function placeBet(type) {
   saveState();
   renderCredits(true);
   renderPendingBets();
+  playSfx('bet');
   showToast(`✅ 下注成功！扣除 $${cost}`);
   triggerBetSceneAnimation(); // 太太在彩券行站姿動畫
 
@@ -1592,8 +1604,11 @@ function renderCredits(animate = false) {
 
 function updatePeriodDisplay() {
   if (state.currentDraw) {
-    document.getElementById('period-display').textContent = state.currentDraw.period || '--';
-    document.getElementById('draw-period-label').textContent = `期號：${state.currentDraw.period || '--'}`;
+    const p = state.currentDraw.period || '--';
+    document.getElementById('period-display').textContent = p;
+    document.getElementById('draw-period-label').textContent = `期號：${p}`;
+    const btEl = document.getElementById('bet-tab-period');
+    if (btEl) btEl.textContent = p;
   }
 }
 
@@ -1626,6 +1641,8 @@ function renderDrawBoard() {
 
   document.getElementById('draw-period-label').textContent = `期號：${draw.period || '--'}`;
   document.getElementById('draw-time-label').textContent = draw.time || new Date().toLocaleTimeString('zh-TW');
+  const btEl = document.getElementById('bet-tab-period');
+  if (btEl) btEl.textContent = draw.period || '--';
 
   // Highlight matches on grid
   if (state.selectedNums.length > 0) highlightMatches(nums);
@@ -1739,7 +1756,7 @@ function renderPendingBets() {
       return `<div class="bet-card flex justify-between items-center gap-2" style="padding:.6rem .8rem">
         <div class="flex-1 min-w-0">
           <p class="font-bold text-sm text-indigo-200 truncate">${desc}</p>
-          <p class="text-xs text-gray-400 mt-0.5">$${bet.amount}/期 &nbsp;·&nbsp; 剩 ${bet.periodsLeft}/${bet.totalPeriods} 期</p>
+          <p class="text-xs text-gray-400 mt-0.5">$${bet.amount}/期 &nbsp;·&nbsp; 剩 ${bet.periodsLeft}/${bet.totalPeriods} 期 &nbsp;·&nbsp; 起始 ${String(bet.startedPeriod||'--').slice(-6)}</p>
         </div>
         <span class="text-yellow-400 font-black text-sm flex-shrink-0">待開</span>
       </div>`;
@@ -2009,6 +2026,42 @@ function showToast(msg, duration = 2500) {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ══════════════════════════════════════
+//  SOUND EFFECTS (Web Audio API 8-bit)
+// ══════════════════════════════════════
+let _sfxCtx = null;
+function getSfxCtx() {
+  if (!_sfxCtx) _sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_sfxCtx.state === 'suspended') _sfxCtx.resume();
+  return _sfxCtx;
+}
+function playSfx(type) {
+  try {
+    const ctx = getSfxCtx();
+    const t = ctx.currentTime;
+    const configs = {
+      win:  { notes:[523,659,784,1047,1319], dur:.09, gap:.1, vol:.18, wave:'square' },
+      lose: { notes:[400,350,280,220],        dur:.13, gap:.11, vol:.15, wave:'sawtooth' },
+      bet:  { notes:[880,1100],               dur:.06, gap:.07, vol:.12, wave:'square' },
+      ball: { notes:[660],                    dur:.05, gap:.05, vol:.08, wave:'square' },
+    };
+    const cfg = configs[type] || configs.ball;
+    cfg.notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = cfg.wave;
+      osc.frequency.value = freq;
+      const start = t + i * cfg.gap;
+      gain.gain.setValueAtTime(cfg.vol, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + cfg.dur + 0.05);
+      osc.start(start);
+      osc.stop(start + cfg.dur + 0.06);
+    });
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════
 //  向老公申請補充點數
 // ══════════════════════════════════════
 const HUBBY_PIN = '8888';
@@ -2118,59 +2171,58 @@ function toggleVideoSound() {
 //  DRAW HISTORY (近期開獎紀錄)
 // ══════════════════════════════════════
 async function fetchDrawHistoryData() {
-  // 嘗試台彩官方歷史 API（多個可能端點）
-  const historyEndpoints = [
+  const HISTORY_ENDPOINTS = [
     'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/BingoResultList',
     'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/LatestBingoResult',
   ];
 
-  for (const url of historyEndpoints) {
-    try {
-      const ctrl = new AbortController();
-      setTimeout(() => ctrl.abort(), 8000);
-      const res = await fetch(url, {
-        signal: ctrl.signal,
-        headers: { 'Accept': 'application/json', 'Referer': 'https://www.taiwanlottery.com/' }
-      });
-      if (!res.ok) continue;
+  function parseHistoryJson(json) {
+    const posts = json?.content?.lotteryBingoHistoryPosts
+      || json?.content?.lotteryBingoPosts
+      || json?.content?.posts
+      || (Array.isArray(json?.content) ? json.content : null)
+      || (Array.isArray(json) ? json : null);
+    if (Array.isArray(posts) && posts.length > 0) {
+      const arr = posts.slice(0, 20).map(post => {
+        const raw = post.openShowOrder ?? post.bigShowOrder;
+        if (!Array.isArray(raw)) return null;
+        const nums = raw.map(Number).filter(n => n >= 1 && n <= 80);
+        if (nums.length !== 20) return null;
+        return { period: String(post.drawTerm ?? ''), numbers: nums, time: post.dDate ?? '', ...computeDrawStats(nums) };
+      }).filter(Boolean);
+      if (arr.length > 0) return arr;
+    }
+    const single = parseTaiwanBingoApi(json);
+    if (single?.numbers) return [{ ...single, ...computeDrawStats(single.numbers) }];
+    return null;
+  }
+
+  // 先試本地 proxy
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 3000);
+    const res = await fetch(LOCAL_PROXY, { signal: ctrl.signal });
+    if (res.ok) {
       const json = await res.json();
+      const data = parseHistoryJson(json);
+      if (data) { renderDrawHistoryPanel(data); return; }
+    }
+  } catch(e) {}
 
-      // 嘗試解析為 array（歷史清單）
-      const posts = json?.content?.lotteryBingoHistoryPosts
-        || json?.content?.lotteryBingoPosts
-        || json?.content?.posts
-        || (Array.isArray(json?.content) ? json.content : null)
-        || (Array.isArray(json) ? json : null);
-
-      if (Array.isArray(posts) && posts.length > 1) {
-        const historyData = posts.slice(0, 20).map(post => {
-          const raw = post.openShowOrder ?? post.bigShowOrder;
-          if (!Array.isArray(raw)) return null;
-          const nums = raw.map(Number).filter(n => n >= 1 && n <= 80);
-          if (nums.length !== 20) return null;
-          const stats = computeDrawStats(nums);
-          return {
-            period: String(post.drawTerm ?? ''),
-            numbers: nums,
-            time: post.dDate ?? '',
-            ...stats
-          };
-        }).filter(Boolean);
-
-        if (historyData.length > 0) {
-          renderDrawHistoryPanel(historyData);
-          return;
-        }
-      }
-
-      // 若是 latest（單筆），先塞進去
-      const single = parseTaiwanBingoApi(json);
-      if (single && single.numbers) {
-        const stats = computeDrawStats(single.numbers);
-        renderDrawHistoryPanel([{ ...single, ...stats }]);
-        return;
-      }
-    } catch(e) { /* try next */ }
+  // 再用 CORS proxy 搭配每個端點
+  for (const endpoint of HISTORY_ENDPOINTS) {
+    for (const proxy of CORS_PROXIES) {
+      try {
+        const url = proxy ? proxy + encodeURIComponent(endpoint) : endpoint;
+        const ctrl = new AbortController();
+        setTimeout(() => ctrl.abort(), 8000);
+        const res = await fetch(url, { signal: ctrl.signal, headers: { 'Accept': 'application/json' } });
+        if (!res.ok) continue;
+        const json = await res.json();
+        const data = parseHistoryJson(json);
+        if (data) { renderDrawHistoryPanel(data); return; }
+      } catch(e) {}
+    }
   }
 
   // Fallback：用 state.drawHistory
