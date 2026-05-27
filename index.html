@@ -8,7 +8,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#fdf0ff;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+body{background:#fdf0ff;background-image:radial-gradient(#e9d5ff 1px,transparent 1px);background-size:16px 16px;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 .neon-purple{color:#9333ea;text-shadow:0 0 8px rgba(147,51,234,.3)}
 .neon-cyan{color:#0891b2;font-weight:900}
 .neon-gold{color:#d97706;font-weight:900}
@@ -16,14 +16,14 @@ body{background:#fdf0ff;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,san
 .neon-red{color:#dc2626;font-weight:900}
 
 /* Draw balls - cute pixel style */
-.draw-ball{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.55) 0%,transparent 60%),linear-gradient(135deg,#a855f7 0%,#9333ea 100%);box-shadow:0 4px 0 #7e22ce,0 6px 12px rgba(147,51,234,.35),inset 0 2px 3px rgba(255,255,255,.4);border:2px solid #7e22ce;opacity:0;transform:scale(0)}
+.draw-ball{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.55) 0%,transparent 60%),linear-gradient(135deg,#a855f7 0%,#9333ea 100%);box-shadow:0 4px 0 #7e22ce,0 6px 12px rgba(147,51,234,.35),inset 0 2px 3px rgba(255,255,255,.4);border:3px solid #7e22ce;opacity:0;transform:scale(0)}
 .draw-ball.show{animation:dropIn .55s cubic-bezier(.34,1.56,.64,1) forwards}
 .draw-ball.super-ball{background:radial-gradient(circle at 32% 32%,rgba(255,255,255,.55) 0%,transparent 60%),linear-gradient(135deg,#fbbf24 0%,#f97316 100%);box-shadow:0 4px 0 #c2410c,0 6px 12px rgba(249,115,22,.35);border-color:#c2410c}
 .draw-ball.empty-ball{background:#f9f0ff;border:2px dashed #c084fc;opacity:1;transform:scale(1)}
 @keyframes dropIn{0%{transform:scale(0) translateY(-25px);opacity:0}65%{transform:scale(1.18) translateY(4px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
 
 /* Number picker */
-.num-btn{height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;cursor:pointer;background:#faf5ff;border:2px solid #d8b4fe;color:#7c3aed;transition:all .12s;user-select:none;-webkit-user-select:none;box-shadow:2px 2px 0 #d8b4fe}
+.num-btn{height:36px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;cursor:pointer;background:#faf5ff;border:2px solid #d8b4fe;color:#7c3aed;transition:all .12s;user-select:none;-webkit-user-select:none;box-shadow:2px 2px 0 #d8b4fe}
 .num-btn:hover:not(.disabled-btn){background:#f3e8ff;border-color:#a855f7;transform:scale(1.1)}
 .num-btn.selected{background:#fbbf24;border-color:#f59e0b;color:#1c1917;box-shadow:2px 2px 0 #d97706}
 .num-btn.drawn{background:#10b981;border-color:#059669;color:#fff;box-shadow:2px 2px 0 #047857}
@@ -32,20 +32,20 @@ body{background:#fdf0ff;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,san
 @keyframes hitFlash{0%,100%{transform:scale(1)}50%{transform:scale(1.35);box-shadow:3px 3px 0 #f43f5e}}
 
 /* Tabs */
-.tab{cursor:pointer;padding:.45rem .9rem;border-radius:6px;font-weight:700;font-size:.82rem;transition:all .18s;color:#9333ea}
+.tab{cursor:pointer;padding:.45rem .9rem;border-radius:2px;font-weight:700;font-size:.82rem;transition:all .18s;color:#9333ea}
 .tab.active{background:#9333ea;color:#fff;box-shadow:3px 3px 0 #7e22ce}
 .tab:not(.active):hover{background:#f3e8ff}
 
 /* Star selector */
-.star-btn{cursor:pointer;min-width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;background:#faf5ff;border:2px solid #d8b4fe;color:#9333ea;transition:all .15s;box-shadow:2px 2px 0 #d8b4fe}
+.star-btn{cursor:pointer;min-width:36px;height:36px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;background:#faf5ff;border:2px solid #d8b4fe;color:#9333ea;transition:all .15s;box-shadow:2px 2px 0 #d8b4fe}
 .star-btn.active{background:#9333ea;border-color:#7e22ce;color:#fff;box-shadow:3px 3px 0 #7e22ce}
 
 /* Multi selector buttons */
-.multi-btn{cursor:pointer;width:38px;height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;background:#faf5ff;border:2px solid #d8b4fe;color:#9333ea;transition:all .12s;box-shadow:2px 2px 0 #d8b4fe}
+.multi-btn{cursor:pointer;width:38px;height:32px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;background:#faf5ff;border:2px solid #d8b4fe;color:#9333ea;transition:all .12s;box-shadow:2px 2px 0 #d8b4fe}
 .multi-btn.active{background:#9333ea;border-color:#7e22ce;color:#fff;box-shadow:3px 3px 0 #7e22ce}
 
 /* Choice buttons (big/small/odd/even) */
-.choice-btn{cursor:pointer;padding:.65rem 1.3rem;border-radius:8px;font-weight:800;font-size:1.05rem;border:2px solid;transition:all .18s;user-select:none;box-shadow:3px 3px 0 rgba(0,0,0,.15)}
+.choice-btn{cursor:pointer;padding:.65rem 1.3rem;border-radius:2px;font-weight:800;font-size:1.05rem;border:2px solid;transition:all .18s;user-select:none;box-shadow:3px 3px 0 rgba(0,0,0,.15)}
 .choice-btn:hover{filter:brightness(1.05);transform:scale(1.04)}
 .choice-btn.ch-active{filter:brightness(1.1);box-shadow:4px 4px 0 rgba(0,0,0,.25);transform:translateY(-1px)}
 
@@ -74,7 +74,7 @@ body{background:#fdf0ff;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,san
 .mnav-icon{font-size:1.3rem;line-height:1}
 #settle-banner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .3s}
 #settle-banner.show{opacity:1}
-.settle-box{padding:.8rem 2rem;border-radius:14px;text-align:center;font-size:1.4rem;font-weight:900;box-shadow:4px 4px 0 rgba(0,0,0,.2)}
+.settle-box{padding:.8rem 2rem;border-radius:2px;text-align:center;font-size:1.4rem;font-weight:900;box-shadow:4px 4px 0 rgba(0,0,0,.2)}
 @keyframes settleIn{0%{transform:scale(0) rotate(-6deg);opacity:0}65%{transform:scale(1.1) rotate(2deg)}100%{transform:scale(1) rotate(0);opacity:1}}
 /* Bottom split */
 #bottom-split{display:flex;flex:1;overflow:hidden;min-height:0}
@@ -82,10 +82,10 @@ body{background:#fdf0ff;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,san
 .right-panel{width:50%;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px;background:#fdf0ff}
 
 /* Section label */
-.s-lbl{font-size:.65rem;font-weight:700;letter-spacing:.15em;color:#9333ea;text-transform:uppercase;margin-bottom:.35rem}
+.s-lbl{font-size:.55rem;font-weight:700;letter-spacing:.15em;color:#9333ea;text-transform:uppercase;margin-bottom:.35rem;font-family:'Press Start 2P',cursive}
 
 /* Bet cards */
-.bet-card{background:#fff;border:2px solid #e9d5ff;border-radius:8px;padding:.7rem;box-shadow:2px 2px 0 #e9d5ff}
+.bet-card{background:#fff;border:2px solid #e9d5ff;border-radius:0px;padding:.7rem;box-shadow:4px 4px 0 #d8b4fe}
 .bet-win{border-color:#86efac !important;background:#f0fdf4 !important;box-shadow:2px 2px 0 #86efac !important}
 .bet-loss{border-color:#fca5a5 !important;background:#fff5f5 !important;box-shadow:2px 2px 0 #fca5a5 !important}
 
@@ -99,7 +99,7 @@ body{background:#fdf0ff;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,san
 
 /* Settlement modal */
 .modal-bg{position:fixed;inset:0;background:rgba(250,245,255,.92);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.modal-box{background:#fff;border:3px solid #c084fc;border-radius:16px;max-width:500px;width:94%;max-height:85vh;overflow-y:auto;box-shadow:6px 6px 0 #e9d5ff}
+.modal-box{background:#fff;border:3px solid #c084fc;border-radius:2px;max-width:500px;width:94%;max-height:85vh;overflow-y:auto;box-shadow:6px 6px 0 #e9d5ff}
 
 /* Credits change animation */
 @keyframes credUp{0%{transform:translateY(0);color:#d97706}50%{transform:translateY(-8px);color:#16a34a}100%{transform:translateY(0);color:#d97706}}
@@ -134,8 +134,8 @@ body{background:#fdf0ff;font-family:'M PLUS Rounded 1c','Segoe UI',system-ui,san
   #video-col{width:100% !important;min-height:0 !important;height:56vw}
   #video-section{position:absolute !important;inset:0;height:100% !important}
   #live-stream{width:100%;height:100%;object-fit:contain !important}
-  #scratch-col{width:100% !important;min-height:auto !important;border-left:none !important;border-top:2px solid #e9d5ff}
-  #scratch-shop{padding:12px;gap:10px}
+  #history-col{width:100% !important;min-height:auto !important;border-left:none !important;border-top:2px solid #e9d5ff}
+  #scratch-shop{padding:8px;gap:8px}
   #sc-card{max-width:100%}
   #bottom-split{flex-direction:column;min-height:auto !important;overflow:visible !important}
   .left-panel,.right-panel{width:100% !important;overflow-y:visible !important;max-height:none !important}
@@ -154,18 +154,20 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 #video-section{position:absolute !important;inset:0;height:auto !important}
 #live-stream{object-fit:contain !important;background:#000}
 
-/* Scratch column */
-#scratch-col{width:50%;background:#fff;border-left:2px solid #e9d5ff;overflow-y:auto;display:flex;flex-direction:column;min-height:480px}
+/* History column */
+#history-col{width:50%;background:#fff;border-left:2px solid #e9d5ff;overflow-y:hidden;display:flex;flex-direction:column;min-height:480px;position:relative}
+#draw-history-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#draw-history-list{overflow-y:auto;flex:1}
 
 /* Scratch shop */
 #scratch-shop{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:16px}
-.sc-shop-preview{background:#FFE600;border-radius:10px;padding:14px;text-align:center;border:3px solid #cc0000;width:90%;max-width:320px;cursor:pointer;transition:transform .15s;box-shadow:4px 4px 0 #aa0000}
+.sc-shop-preview{background:#FFE600;border-radius:2px;padding:14px;text-align:center;border:3px solid #cc0000;width:90%;max-width:320px;cursor:pointer;transition:transform .15s;box-shadow:4px 4px 0 #aa0000}
 .sc-shop-preview:hover{transform:scale(1.02)}
 .sc-777-big{font-size:2.4rem;font-weight:900;color:#cc0000;text-shadow:3px 3px 0 #800000;display:block}
 
 /* Scratch game */
 #scratch-game{display:flex;flex-direction:column;align-items:center;padding:10px;gap:8px;flex:1}
-#sc-card{width:100%;max-width:460px;background:#FFE600;border-radius:10px;overflow:hidden;font-family:'Segoe UI',sans-serif;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
+#sc-card{width:100%;max-width:460px;background:#FFE600;border-radius:2px;overflow:hidden;font-family:'Segoe UI',sans-serif;box-shadow:4px 4px 0 rgba(0,0,0,.25)}
 #sc-header{padding:8px 10px}
 .sc-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .sc-price{background:#cc0000;color:#fff;font-size:.68rem;font-weight:900;padding:2px 8px;border-radius:4px}
@@ -304,71 +306,22 @@ body{height:auto !important;overflow:auto !important;display:block !important}
 </div>
 </div><!-- /#video-col -->
 
-<!-- ═══ SCRATCH COL ═══ -->
-<div id="scratch-col" style="position:relative">
-  <!-- 商店畫面 -->
-  <div id="scratch-shop">
-    <div style="text-align:center">
-      <p style="color:#fbbf24;font-size:.75rem;font-weight:700;letter-spacing:.1em">✨ 虛擬刮刮樂</p>
-      <span class="sc-777-big">777</span>
-      <p style="color:#888;font-size:.65rem;margin-top:2px">LUCKY SEVEN</p>
+<!-- ═══ HISTORY COL ═══ -->
+<div id="history-col">
+  <div id="draw-history-panel">
+    <div style="padding:8px 12px;background:#faf5ff;border-bottom:2px solid #e9d5ff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-family:'Press Start 2P',cursive;font-size:.5rem;color:#9333ea;letter-spacing:.05em">📊 近期開獎</span>
+      <span id="history-update-time" style="font-size:.6rem;color:#9ca3af"></span>
     </div>
-    <div class="sc-shop-preview" onclick="buyScratchCard()">
-      <p style="font-size:.78rem;color:#cc0000;font-weight:700;margin-bottom:6px">🎴 點此購買刮刮樂</p>
-      <p style="font-size:1.7rem;font-weight:900;color:#333">NT $100</p>
-      <p style="font-size:.62rem;color:#666;margin-top:4px">總中獎率 30.11%</p>
+    <div id="draw-history-list" style="overflow-y:auto;flex:1;padding:0">
+      <p style="text-align:center;color:#9ca3af;font-size:.75rem;padding:20px">資料載入中...</p>
     </div>
-    <div style="text-align:center;color:#666;font-size:.67rem;line-height:1.9">
-      <p>🎯 左側刮出 3 個相同金額 → 得獎</p>
-      <p>🎯 出現「7」→ 得 $700</p>
-      <p>🎯 右側任一行 3 個「07」→ 得獎金欄獎額</p>
-    </div>
-    <p style="color:#888;font-size:.62rem">目前點數：<span id="sc-credits" style="color:#fbbf24;font-weight:700">$1,000</span></p>
   </div>
-
-  <!-- 遊戲畫面 -->
-  <div id="scratch-game" style="display:none;flex-direction:column;align-items:center;padding:10px;gap:8px;flex:1">
-    <div id="sc-card">
-      <div id="sc-header">
-        <div class="sc-title-row">
-          <span class="sc-777">777</span>
-          <span class="sc-price">NT$100</span>
-          <span class="sc-serial" id="sc-serial-no">777-000000</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:2px">
-          <p class="sc-jackpot">最高獎金 $2,000</p>
-          <p class="sc-rule-text">刮出3個相同金額即得獎<br>出現「7」得$700<br>右側連線3個「07」得獎金欄</p>
-        </div>
-      </div>
-      <div id="sc-area">
-        <div id="sc-left">
-          <p style="font-size:.5rem;color:#cc0000;font-weight:700;text-align:center;margin-bottom:2px">★ 刮開查看 ★</p>
-          <div id="sc-left-grid"></div>
-        </div>
-        <div id="sc-right">
-          <div class="sc-prize-box">
-            <p class="sc-prize-lbl">獎金欄</p>
-            <span class="sc-prize-val" id="sc-prize-val">$500</span>
-          </div>
-          <div id="sc-right-grid"></div>
-        </div>
-        <canvas id="scratch-canvas"></canvas>
-      </div>
-      <div id="sc-footer">
-        本場已購：<span id="sc-count">0</span> 張 &nbsp;|&nbsp; 中獎率 30.11%
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:center;width:100%;max-width:460px">
-      <button onclick="autoRevealAll()" style="flex:1;padding:.5rem;background:#9333ea;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;box-shadow:3px 3px 0 #7e22ce">⚡ 全部揭開</button>
-      <button onclick="resetScratch()" style="flex:1;padding:.5rem;background:#f3e8ff;color:#7c3aed;border:2px solid #d8b4fe;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;box-shadow:3px 3px 0 #d8b4fe">🎴 再買一張</button>
-    </div>
-    <div id="sc-result-msg" style="min-height:28px;text-align:center;font-weight:900;font-size:1rem"></div>
-  </div>
-  <!-- 太太人像覆蓋層 -->
+  <!-- 太太人像覆蓋層（保留供結算動畫用） -->
   <div id="sprite-result-wrap">
     <img id="sprite-result-img" src="" alt="">
   </div>
-</div><!-- /#scratch-col -->
+</div><!-- /#history-col -->
 </div><!-- /#top-section -->
 
 <!-- ═══ BINGO SECTION ═══ -->
@@ -555,31 +508,73 @@ body{height:auto !important;overflow:auto !important;display:block !important}
       </div>
     </div>
 
-    <!-- History table -->
-    <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
-      <p class="s-lbl">近10期走勢</p>
-      <div class="overflow-x-auto">
-        <table class="w-full text-xs">
-          <thead>
-            <tr class="text-indigo-400 border-b border-indigo-900">
-              <th class="text-left pb-2 font-bold">期號</th>
-              <th class="pb-2 font-bold">開出號碼</th>
-              <th class="pb-2 font-bold">大小</th>
-              <th class="pb-2 font-bold">單雙</th>
-            </tr>
-          </thead>
-          <tbody id="history-tbody">
-            <tr><td colspan="5" class="text-center text-gray-600 py-4">尚無歷史記錄</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
     <!-- Bet history -->
     <div class="bg-[#0a0a2e] rounded-xl p-3 border border-indigo-900">
       <p class="s-lbl">投注歷史 <span class="text-gray-500 normal-case font-normal text-[10px]">（最近20筆）</span></p>
       <div id="bet-history-list" class="space-y-1 max-h-48 overflow-y-auto">
         <p class="text-gray-600 text-xs text-center py-3">尚無投注歷史</p>
+      </div>
+    </div>
+
+    <!-- Scratch card -->
+    <div id="scratch-panel-wrap" style="border-radius:0;border:2px solid #e9d5ff;box-shadow:4px 4px 0 #e9d5ff;overflow:hidden">
+      <!-- 商店畫面 -->
+      <div id="scratch-shop" style="padding:8px;gap:8px">
+        <div style="text-align:center">
+          <p style="color:#fbbf24;font-size:.75rem;font-weight:700;letter-spacing:.1em">✨ 虛擬刮刮樂</p>
+          <span class="sc-777-big">777</span>
+          <p style="color:#888;font-size:.65rem;margin-top:2px">LUCKY SEVEN</p>
+        </div>
+        <div class="sc-shop-preview" onclick="buyScratchCard()">
+          <p style="font-size:.78rem;color:#cc0000;font-weight:700;margin-bottom:6px">🎴 點此購買刮刮樂</p>
+          <p style="font-size:1.7rem;font-weight:900;color:#333">NT $100</p>
+          <p style="font-size:.62rem;color:#666;margin-top:4px">總中獎率 30.11%</p>
+        </div>
+        <div style="text-align:center;color:#666;font-size:.67rem;line-height:1.9">
+          <p>🎯 左側刮出 3 個相同金額 → 得獎</p>
+          <p>🎯 出現「7」→ 得 $700</p>
+          <p>🎯 右側任一行 3 個「07」→ 得獎金欄獎額</p>
+        </div>
+        <p style="color:#888;font-size:.62rem">目前點數：<span id="sc-credits" style="color:#fbbf24;font-weight:700">$1,000</span></p>
+      </div>
+
+      <!-- 遊戲畫面 -->
+      <div id="scratch-game" style="display:none;flex-direction:column;align-items:center;padding:10px;gap:8px;flex:1">
+        <div id="sc-card">
+          <div id="sc-header">
+            <div class="sc-title-row">
+              <span class="sc-777">777</span>
+              <span class="sc-price">NT$100</span>
+              <span class="sc-serial" id="sc-serial-no">777-000000</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:2px">
+              <p class="sc-jackpot">最高獎金 $2,000</p>
+              <p class="sc-rule-text">刮出3個相同金額即得獎<br>出現「7」得$700<br>右側連線3個「07」得獎金欄</p>
+            </div>
+          </div>
+          <div id="sc-area">
+            <div id="sc-left">
+              <p style="font-size:.5rem;color:#cc0000;font-weight:700;text-align:center;margin-bottom:2px">★ 刮開查看 ★</p>
+              <div id="sc-left-grid"></div>
+            </div>
+            <div id="sc-right">
+              <div class="sc-prize-box">
+                <p class="sc-prize-lbl">獎金欄</p>
+                <span class="sc-prize-val" id="sc-prize-val">$500</span>
+              </div>
+              <div id="sc-right-grid"></div>
+            </div>
+            <canvas id="scratch-canvas"></canvas>
+          </div>
+          <div id="sc-footer">
+            本場已購：<span id="sc-count">0</span> 張 &nbsp;|&nbsp; 中獎率 30.11%
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center;width:100%;max-width:460px">
+          <button onclick="autoRevealAll()" style="flex:1;padding:.5rem;background:#9333ea;color:#fff;border:none;border-radius:2px;font-weight:700;font-size:.8rem;cursor:pointer;box-shadow:3px 3px 0 #7e22ce">⚡ 全部揭開</button>
+          <button onclick="resetScratch()" style="flex:1;padding:.5rem;background:#f3e8ff;color:#7c3aed;border:2px solid #d8b4fe;border-radius:2px;font-weight:700;font-size:.8rem;cursor:pointer;box-shadow:3px 3px 0 #d8b4fe">🎴 再買一張</button>
+        </div>
+        <div id="sc-result-msg" style="min-height:28px;text-align:center;font-weight:900;font-size:1rem"></div>
       </div>
     </div>
   </div>
@@ -616,14 +611,14 @@ body{height:auto !important;overflow:auto !important;display:block !important}
   <button class="mnav-btn" onclick="mnavTo('top-section')">
     <span class="mnav-icon">🎬</span>直播
   </button>
-  <button class="mnav-btn" onclick="mnavTo('scratch-col')">
-    <span class="mnav-icon">🎴</span>刮刮樂
+  <button class="mnav-btn" onclick="mnavTo('history-col')">
+    <span class="mnav-icon">📊</span>開獎
   </button>
   <button class="mnav-btn" onclick="mnavTo('bingo-section')">
     <span class="mnav-icon">🎱</span>投注
   </button>
-  <button class="mnav-btn" onclick="mnavTo('history-tbody')">
-    <span class="mnav-icon">📊</span>走勢
+  <button class="mnav-btn" onclick="mnavTo('scratch-panel-wrap')">
+    <span class="mnav-icon">🎴</span>刮刮樂
   </button>
 </nav>
 
@@ -1274,6 +1269,9 @@ async function onNewDraw(drawData) {
   // Animate draw
   await animateDraw(drawData.numbers);
 
+  // 更新歷史開獎面板
+  renderDrawHistoryPanel(state.drawHistory);
+
   // Settle bets
   const settlementResults = settleBets(drawData.numbers, drawData.period, stats);
   state.lastSettledPeriod = drawData.period;
@@ -1778,22 +1776,7 @@ function renderBetHistory() {
 }
 
 function renderHistory() {
-  const tbody = document.getElementById('history-tbody');
-  if (state.drawHistory.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-600 py-4">尚無歷史記錄</td></tr>';
-    return;
-  }
-  tbody.innerHTML = state.drawHistory.map(h => `
-    <tr class="border-b border-indigo-950">
-      <td class="text-left py-2 text-sm text-gray-400 font-mono">${h.period ? String(h.period).slice(-5) : '--'}</td>
-      <td class="py-2">
-        <div class="flex flex-wrap gap-1 justify-center">
-          ${h.numbers.map((n, i) => `<span style="font-size:.95rem" class="font-mono ${i===19 ? 'text-yellow-400 font-bold' : 'text-gray-300'}">${String(n).padStart(2,'0')}</span>`).join(' ')}
-        </div>
-      </td>
-      <td class="text-center py-2 text-base font-black ${h.isBig ? 'text-cyan-400' : h.isSmall ? 'text-red-400' : 'text-gray-500'}">${h.isBig ? '大' : h.isSmall ? '小' : '－'}</td>
-      <td class="text-center py-2 text-base font-black ${h.isOdd ? 'text-purple-400' : h.isEven ? 'text-green-400' : 'text-gray-500'}">${h.isOdd ? '單' : h.isEven ? '雙' : '－'}</td>
-    </tr>`).join('');
+  renderDrawHistoryPanel(state.drawHistory);
 }
 
 function renderPayoutRef() {
@@ -2132,6 +2115,102 @@ function toggleVideoSound() {
 }
 
 // ══════════════════════════════════════
+//  DRAW HISTORY (近期開獎紀錄)
+// ══════════════════════════════════════
+async function fetchDrawHistoryData() {
+  // 嘗試台彩官方歷史 API（多個可能端點）
+  const historyEndpoints = [
+    'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/BingoResultList',
+    'https://api.taiwanlottery.com/TLCAPIWeB/Lottery/LatestBingoResult',
+  ];
+
+  for (const url of historyEndpoints) {
+    try {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(url, {
+        signal: ctrl.signal,
+        headers: { 'Accept': 'application/json', 'Referer': 'https://www.taiwanlottery.com/' }
+      });
+      if (!res.ok) continue;
+      const json = await res.json();
+
+      // 嘗試解析為 array（歷史清單）
+      const posts = json?.content?.lotteryBingoHistoryPosts
+        || json?.content?.lotteryBingoPosts
+        || json?.content?.posts
+        || (Array.isArray(json?.content) ? json.content : null)
+        || (Array.isArray(json) ? json : null);
+
+      if (Array.isArray(posts) && posts.length > 1) {
+        const historyData = posts.slice(0, 20).map(post => {
+          const raw = post.openShowOrder ?? post.bigShowOrder;
+          if (!Array.isArray(raw)) return null;
+          const nums = raw.map(Number).filter(n => n >= 1 && n <= 80);
+          if (nums.length !== 20) return null;
+          const stats = computeDrawStats(nums);
+          return {
+            period: String(post.drawTerm ?? ''),
+            numbers: nums,
+            time: post.dDate ?? '',
+            ...stats
+          };
+        }).filter(Boolean);
+
+        if (historyData.length > 0) {
+          renderDrawHistoryPanel(historyData);
+          return;
+        }
+      }
+
+      // 若是 latest（單筆），先塞進去
+      const single = parseTaiwanBingoApi(json);
+      if (single && single.numbers) {
+        const stats = computeDrawStats(single.numbers);
+        renderDrawHistoryPanel([{ ...single, ...stats }]);
+        return;
+      }
+    } catch(e) { /* try next */ }
+  }
+
+  // Fallback：用 state.drawHistory
+  if (state.drawHistory.length > 0) {
+    renderDrawHistoryPanel(state.drawHistory);
+  }
+}
+
+function renderDrawHistoryPanel(historyArr) {
+  const container = document.getElementById('draw-history-list');
+  if (!container || !historyArr || historyArr.length === 0) return;
+
+  container.innerHTML = historyArr.map(h => {
+    const balls = (h.numbers || []).map((n, i) => {
+      const isSuper = i === 19;
+      return `<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:${isSuper ? 'linear-gradient(135deg,#fbbf24,#f97316)' : 'linear-gradient(135deg,#a855f7,#9333ea)'};color:#fff;font-size:.52rem;font-weight:900;box-shadow:${isSuper ? '2px 2px 0 #c2410c' : '2px 2px 0 #7e22ce'};border:1px solid ${isSuper ? '#c2410c' : '#7e22ce'};flex-shrink:0;margin:1px">${String(n).padStart(2,'0')}</span>`;
+    }).join('');
+
+    const bsText = h.isBig ? '大' : h.isSmall ? '小' : '－';
+    const bsColor = h.isBig ? '#0891b2' : h.isSmall ? '#dc2626' : '#9ca3af';
+    const oeText = h.isOdd ? '單' : h.isEven ? '雙' : '－';
+    const oeColor = h.isOdd ? '#9333ea' : h.isEven ? '#15803d' : '#9ca3af';
+    const timeStr = h.time ? String(h.time).replace('T',' ').slice(0,16) : '';
+
+    return `<div style="padding:5px 8px;border-bottom:2px solid #f3e8ff;background:#fff">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+        <span style="font-size:.58rem;color:#7c3aed;font-weight:700;font-family:'Press Start 2P',cursive;letter-spacing:-.02em">${String(h.period || '--').slice(-6)}</span>
+        <span style="font-size:.55rem;color:#9ca3af;flex:1">${timeStr}</span>
+        <span style="font-size:.68rem;font-weight:900;color:${bsColor};min-width:14px;text-align:center">${bsText}</span>
+        <span style="font-size:.68rem;font-weight:900;color:${oeColor};min-width:14px;text-align:center">${oeText}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:1px">${balls}</div>
+    </div>`;
+  }).join('');
+
+  const timeEl = document.getElementById('history-update-time');
+  if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'});
+}
+
+// ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
 function init() {
@@ -2170,6 +2249,9 @@ function init() {
 
   // 精準排程：開獎後 60 秒再抓
   scheduleNextFetch();
+
+  // 初始載入歷史
+  fetchDrawHistoryData();
 }
 
 document.addEventListener('DOMContentLoaded', init);
